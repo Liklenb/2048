@@ -1,4 +1,224 @@
 import tkinter.font
+# On importe randint et random du package random, qui vont nous permettre de choisir aléatoirement une tuile vide.
+from random import randint, random
+
+
+def Grid():
+    """
+    Fonction regroupant toutes les fonctions invisibles à la grille de jeu.
+    """
+
+    def start(grid: list):
+        """
+        Génère deux tuiles de valeur 2 ou 4 aléatoirement sur la grille.
+        :param: grid: list
+        :return: grid
+        """
+
+        # On génère deux tuiles aléatoirement.
+        for i in range(2):
+            self["generate_new_tile"](grid)
+
+        return grid
+
+    def new_game():
+        """
+        Crée une nouvelle grille de jeu et lance la partie.
+        :return: grid
+        """
+
+        # On crée une grille vierge.
+        grid = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+        # On appelle la fonction start pour générer deux tuiles aléatoires.
+        self["start"](grid)
+        return grid
+
+    def generate_new_tile(grid: list):
+        """
+        Génère une nouvelle tuile de valeur 2 ou 4 aléatoirement sur la grille.
+        :param grid: list
+        :return: grid
+        """
+
+        # On récupère les positions vides de la grille et on les stocke dans une liste.
+        pos = []
+        for x in range(4):
+            for y in range(4):
+                if grid[x][y] == 0:
+                    pos.append((x, y))
+
+        # On choisit aléatoirement une position vide et on génère une tuile de valeur 2 ou 4.
+        if pos:
+            x, y = pos[randint(0, len(pos) - 1)]
+            if random() < 0.9:
+                grid[x][y] = 2
+            else:
+                grid[x][y] = 4
+
+        return grid
+
+    def is_win(grid: list):
+        for ligne in grid:
+            for elem in ligne:
+                if elem == 2048:
+                    return True
+        return False
+
+    def move_up(grid: list):
+        """"
+        Déplace les tuiles vers le haut.
+        :param grid: list
+        :return: mouvement, fusion, grid
+        """
+
+        # On crée trois dictionnaires vides qui vont nous permettre de stocker les mouvements, les fusions et les cases
+        # ayant déjà fusionné.
+        mouvement, fusion, hasfusion = {}, {}, {}
+
+        # On parcourt la grille de haut en bas, de gauche à droite.
+        for x in range(1, 4):
+            for y in range(4):
+
+                # Si la case actuelle n'est pas vide.
+                if grid[x][y] != 0:
+
+                    # On définit la variable prev_x, qui est la case au-dessus de la case actuelle.
+                    prev_x = x - 1
+
+                    # Tant que la case au-dessus est vide, on continue de monter.
+                    while prev_x >= 0 and grid[prev_x][y] == 0:
+                        prev_x -= 1
+
+                    # Si la case au-dessus est égale à la case actuelle et qu'elle n'a pas déjà fusionné, on fusionne
+                    # les deux cases, on supprime la case actuelle, on ajoute la case fusionnée à la liste des cases
+                    # fusionnées.
+                    if prev_x >= 0 and grid[prev_x][y] == grid[x][y] and (prev_x, y) not in hasfusion:
+                        grid[prev_x][y] *= 2
+                        grid[x][y] = 0
+                        fusion[(x, y), (prev_x, y)] = (prev_x, y)
+                        hasfusion[(prev_x, y)] = True
+
+                    # Sinon, on déplace la case actuelle vers la première case vide au-dessus.
+                    else:
+                        if prev_x != x - 1:
+                            grid[prev_x + 1][y] = grid[x][y]
+                            grid[x][y] = 0
+                            mouvement[(x, y)] = (prev_x + 1, y)
+
+        # Si une fusion ou un mouvement a eu lieu, on génère une nouvelle tuile.
+        if fusion or mouvement != {}:
+            self["generate_new_tile"](grid)
+
+        return [mouvement, fusion, grid]
+
+    def move_down(grid: list):
+        """
+        Déplace les tuiles vers le bas.
+        :param grid: list
+        :return: mouvement, fusion, grid
+        """
+
+        mouvement, fusion, hasfusion = {}, {}, {}
+
+        # On parcourt la grille de bas en haut, de gauche à droite (l'inverse de move_up).
+        for x in range(2, -1, -1):
+            for y in range(4):
+                if grid[x][y] != 0:
+
+                    prev_x = x + 1
+                    while prev_x <= 3 and grid[prev_x][y] == 0:
+                        prev_x += 1
+
+                    if prev_x <= 3 and grid[prev_x][y] == grid[x][y] and (prev_x, y) not in hasfusion:
+                        grid[prev_x][y] *= 2
+                        grid[x][y] = 0
+                        fusion[(x, y), (prev_x, y)] = (prev_x, y)
+                        hasfusion[(prev_x, y)] = True
+                    else:
+                        if prev_x != x + 1:
+                            grid[prev_x - 1][y] = grid[x][y]
+                            grid[x][y] = 0
+                            mouvement[(x, y)] = (prev_x - 1, y)
+
+        if fusion or mouvement != {}:
+            self["generate_new_tile"](grid)
+
+        return [mouvement, fusion, grid]
+
+    def move_left(grid: list):
+        """
+        Déplace les tuiles vers la gauche.
+        :param grid: list
+        :return: mouvement, fusion, grid
+        """
+
+        mouvement, fusion, hasfusion = {}, {}, {}
+
+        # On parcourt la grille de gauche à droite, de haut en bas.
+        for x in range(4):
+            for y in range(1, 4):
+                if grid[x][y] != 0:
+
+                    prev_y = y - 1
+                    while prev_y >= 0 and grid[x][prev_y] == 0:
+                        prev_y -= 1
+
+                    if prev_y >= 0 and grid[x][prev_y] == grid[x][y] and (x, prev_y) not in hasfusion:
+                        grid[x][prev_y] *= 2
+                        grid[x][y] = 0
+                        fusion[(x, y), (x, prev_y)] = (x, prev_y)
+                        hasfusion[(x, prev_y)] = True
+                    else:
+                        if prev_y != y - 1:
+                            grid[x][prev_y + 1] = grid[x][y]
+                            grid[x][y] = 0
+                            mouvement[(x, y)] = (x, prev_y + 1)
+
+        if fusion or mouvement != {}:
+            self["generate_new_tile"](grid)
+
+        return [mouvement, fusion, grid]
+
+    def move_right(grid: list):
+        mouvement, fusion, hasfusion = {}, {}, {}
+
+        # On parcourt la grille de droite à gauche, de haut en bas.
+        for x in range(4):
+            for y in range(2, -1, -1):
+                if grid[x][y] != 0:
+
+                    prev_y = y + 1
+                    while prev_y <= 3 and grid[x][prev_y] == 0:
+                        prev_y += 1
+
+                    if prev_y <= 3 and grid[x][prev_y] == grid[x][y] and (x, prev_y) not in hasfusion:
+                        grid[x][prev_y] *= 2
+                        grid[x][y] = 0
+                        fusion[(x, y), (x, prev_y)] = (x, prev_y)
+                        hasfusion[(x, prev_y)] = True
+                    else:
+                        if prev_y != y + 1:
+                            grid[x][prev_y - 1] = grid[x][y]
+                            grid[x][y] = 0
+                            mouvement[(x, y)] = (x, prev_y - 1)
+
+        if fusion or mouvement != {}:
+            self["generate_new_tile"](grid)
+
+        return [mouvement, fusion, grid]
+
+    self = {
+        "start": start,
+        "new_game": new_game,
+        "generate_new_tile": generate_new_tile,
+        "is_win": is_win,
+        "move_up": move_up,
+        "move_down": move_down,
+        "move_left": move_left,
+        "move_right": move_right
+    }
+
+    return self
 
 
 def rgb_to_tkinter(rgb: tuple[int, int, int]):
@@ -40,7 +260,7 @@ def BetterButton(canvas: tkinter.Canvas,
                  color: tuple[int, int, int] = (255, 255, 255),
                  hover_color: tuple[int, int, int] = (200, 200, 200),
                  hover_text_color: tuple[int, int, int] = (0, 0, 0),
-                 command=None,
+                 command=lambda: None,
                  padding: tuple[int, int] = (50, 20),
                  border_radius: int = 50,
                  font: tkinter.font.Font = None,
