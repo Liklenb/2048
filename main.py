@@ -1,4 +1,5 @@
 import tkinter.font
+
 # On importe randint et random du package random.
 from random import randint, random
 
@@ -127,9 +128,11 @@ def Grid():
         """
 
         data = {
-            "mouvement": {},
-            "fusion": {},
+            "mouvement": [],
+            "fusion": [],
         }
+
+        pos = []
 
         if check_win(matrix):
             return [data, matrix]
@@ -154,22 +157,29 @@ def Grid():
                 while (0 <= prev_x < 4 and 0 <= prev_y < 4) and matrix[prev_x][prev_y] == 0:
                     prev_x, prev_y = prev_x + dx, prev_y + dy
 
+                # On stocke les coordonnées des cases qui ont fusionné.
+                if data["fusion"]:
+                    for i in range(len(data["fusion"])):
+                        if data["fusion"][i]["to"] in pos:
+                            continue
+                        pos.append(data["fusion"][i]["to"])
+
                 # Si la case précédente est égale à la case actuelle et qu'elle n'a pas déjà fusionné, on fusionne
                 # les deux cases.
                 if (0 <= prev_x < 4 and 0 <= prev_y < 4) and matrix[prev_x][prev_y] == matrix[x][y] and (
-                        prev_x, prev_y) not in data["fusion"]:
+                        prev_x, prev_y) not in pos:
                     matrix[prev_x][prev_y] *= 2
                     matrix[x][y] = 0
 
                     # On stocke les coordonnées de la case qui a fusionné.
-                    data["fusion"][(prev_x, prev_y)] = (x, y)
+                    data["fusion"].append({"from": (x, y), "to": (prev_x, prev_y)})
 
                 # Sinon, on déplace la case actuelle vers la première case vide au-dessus.
                 else:
                     if (prev_x - dx, prev_y - dy) != (x, y):
                         matrix[prev_x - dx][prev_y - dy] = matrix[x][y]
                         matrix[x][y] = 0
-                        data["mouvement"][(x, y)] = (prev_x - dx, prev_y - dy)
+                        data["mouvement"].append({"from": (x, y), "to": (prev_x - dx, prev_y - dy)})
 
         # Génère une nouvelle tuile si une fusion ou un mouvement a eu lieu
         if data["mouvement"] or data["fusion"]:
@@ -226,10 +236,11 @@ def Grid():
         "move": move,
         "update_score": update_score,
         "save": save,
-        "load": load,
+        "load": load
     }
 
     return self
+
 
 def rgb_to_tkinter(rgb: tuple[int, int, int]):
     """translates an rgb tuple of int to a tkinter friendly color code
