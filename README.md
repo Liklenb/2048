@@ -1,6 +1,6 @@
 # 2048
 
-> Groupe de TD : LDDBI-GA
+> Groupe de TD : LDDBI-G1
 
 >__Nom des étudiants :__
 >* Alexandre François
