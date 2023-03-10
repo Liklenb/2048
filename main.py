@@ -272,6 +272,7 @@ def BetterButton(canvas: tkinter.Canvas,
                  hover_text_color: tuple[int, int, int] = (0, 0, 0),
                  command=lambda: None,
                  padding: tuple[int, int] = (50, 20),
+                 size: tuple[int, int] = None,
                  border_radius: int = 50,
                  font: tkinter.font.Font = None,
                  anchor: str = "nw", ):
@@ -353,6 +354,8 @@ def BetterButton(canvas: tkinter.Canvas,
         self["font"] = tkinter.font.Font(family="TkDefaultFont")
     self["text_size"] = self["font"].measure(self["text"]), self["font"].metrics("linespace")
 
+    if size:
+        padding = size[0] - self["text_size"][0], size[1] - self["text_size"][1]
     self["size"] = self["text_size"][0] + padding[0], self["text_size"][1] + padding[1]
     self["x"], self["y"] = self["get_anchor_position"](self, self["x"], self["y"])
     self["build"](self)
@@ -367,7 +370,7 @@ def Menu(root: tkinter.Tk):
     self["canvas"].pack()
     self["canvas"].create_text(root.winfo_width() // 2, 20, anchor="n", text="2048", font=tkinter.font.Font(size=100))
     BetterButton(self["canvas"], root.winfo_width() // 2, root.winfo_height() // 2, "Commencer", anchor="s",
-                 padding=(200, 50))
+                 size=(200, 50))
 
 
 def main():
