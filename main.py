@@ -1,6 +1,11 @@
 import tkinter.font
-# On importe randint et random du package random, qui vont nous permettre de choisir aléatoirement une tuile vide.
+# On importe randint et random du package random.
 from random import randint, random
+
+# On importe les fonctions de tkinter, json et datetime pour enregistrer une partie.
+from tkinter.filedialog import asksaveasfile, askopenfile
+import json
+from datetime import datetime
 
 
 def Grid():
@@ -8,218 +13,223 @@ def Grid():
     Fonction regroupant toutes les fonctions invisibles à la grille de jeu.
     """
 
-    def start(grid: list):
+    def start(matrix: list):
         """
         Génère deux tuiles de valeur 2 ou 4 aléatoirement sur la grille.
-        :param: grid: list
-        :return: grid
+        :param matrix: List
+        :return: matrix
         """
 
         # On génère deux tuiles aléatoirement.
         for i in range(2):
-            self["generate_new_tile"](grid)
+            generate_new_tile(matrix)
 
-        return grid
+        return matrix
 
-    def new_game():
+    def get_empty_tiles(matrix: list):
         """
-        Crée une nouvelle grille de jeu et lance la partie.
-        :return: grid
-        """
-
-        # On crée une grille vierge.
-        grid = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
-        # On appelle la fonction start pour générer deux tuiles aléatoires.
-        self["start"](grid)
-        return grid
-
-    def generate_new_tile(grid: list):
-        """
-        Génère une nouvelle tuile de valeur 2 ou 4 aléatoirement sur la grille.
-        :param grid: list
-        :return: grid
+        Récupère les positions vides de la grille.
+        :param matrix: List
+        :return: pos
         """
 
-        # On récupère les positions vides de la grille et on les stocke dans une liste.
         pos = []
         for x in range(4):
             for y in range(4):
-                if grid[x][y] == 0:
+                if matrix[x][y] == 0:
                     pos.append((x, y))
+        return pos
+
+    def generate_new_tile(matrix: list):
+        """
+        Génère une nouvelle tuile de valeur 2 ou 4 aléatoirement sur la grille.
+        :param matrix: List
+        :return: matrix
+        """
+
+        # On récupère les positions vides de la grille et on les stocke.
+        pos = get_empty_tiles(matrix)
 
         # On choisit aléatoirement une position vide et on génère une tuile de valeur 2 ou 4.
         if pos:
             x, y = pos[randint(0, len(pos) - 1)]
             if random() < 0.9:
-                grid[x][y] = 2
+                matrix[x][y] = 2
             else:
-                grid[x][y] = 4
+                matrix[x][y] = 4
 
-        return grid
+        return matrix
 
-    def is_win(grid: list):
-        for ligne in grid:
+    def check_win(matrix: list):
+        """
+        Vérifie si la partie est gagnée.
+        :param matrix: List
+        :return: bool
+        """
+
+        for ligne in matrix:
             for elem in ligne:
                 if elem == 2048:
                     return True
         return False
 
-    def move_up(grid: list):
-        """"
-        Déplace les tuiles vers le haut.
-        :param grid: list
-        :return: mouvement, fusion, grid
+    def check_lose(matrix: list):
+        """
+        Vérifie si on peut faire un mouvement dans la direction donnée.
+        :param matrix: List
+        :return: bool
         """
 
-        # On crée trois dictionnaires vides qui vont nous permettre de stocker les mouvements, les fusions et les cases
-        # ayant déjà fusionné.
-        mouvement, fusion, hasfusion = {}, {}, {}
+        if get_empty_tiles(matrix):
+            return False
 
-        # On parcourt la grille de haut en bas, de gauche à droite.
-        for x in range(1, 4):
-            for y in range(4):
+        # On vérifie si on peut faire un mouvement dans la direction donnée.
+        for direction in config:
 
-                # Si la case actuelle n'est pas vide.
-                if grid[x][y] != 0:
+            # On récupère les coordonnées de départ et d'arrivée.
+            dx, dy = config[direction]["dx"], config[direction]["dy"]
+            x_start, x_end, x_step = config[direction]["x_start"], config[direction]["x_end"], config[direction][
+                "x_step"]
+            y_start, y_end, y_step = config[direction]["y_start"], config[direction]["y_end"], config[direction][
+                "y_step"]
 
-                    # On définit la variable prev_x, qui est la case au-dessus de la case actuelle.
-                    prev_x = x - 1
+            # oN parcourt la grille.
+            for x in range(x_start, x_end, x_step):
+                for y in range(y_start, y_end, y_step):
 
-                    # Tant que la case au-dessus est vide, on continue de monter.
-                    while prev_x >= 0 and grid[prev_x][y] == 0:
-                        prev_x -= 1
+                    # On vérifie si la case est vide ou si la valeur de la case est égale à la valeur de la case
+                    # adjacente.
+                    if matrix[x][y] == matrix[x + dx][y + dy] or matrix[x + dx][y + dy] == 0:
+                        return False
 
-                    # Si la case au-dessus est égale à la case actuelle et qu'elle n'a pas déjà fusionné, on fusionne
-                    # les deux cases, on supprime la case actuelle, on ajoute la case fusionnée à la liste des cases
-                    # fusionnées.
-                    if prev_x >= 0 and grid[prev_x][y] == grid[x][y] and (prev_x, y) not in hasfusion:
-                        grid[prev_x][y] *= 2
-                        grid[x][y] = 0
-                        fusion[(x, y), (prev_x, y)] = (prev_x, y)
-                        hasfusion[(prev_x, y)] = True
+        return True
 
-                    # Sinon, on déplace la case actuelle vers la première case vide au-dessus.
-                    else:
-                        if prev_x != x - 1:
-                            grid[prev_x + 1][y] = grid[x][y]
-                            grid[x][y] = 0
-                            mouvement[(x, y)] = (prev_x + 1, y)
-
-        # Si une fusion ou un mouvement a eu lieu, on génère une nouvelle tuile.
-        if fusion or mouvement != {}:
-            self["generate_new_tile"](grid)
-
-        return [mouvement, fusion, grid]
-
-    def move_down(grid: list):
+    def update_score(matrix: list):
         """
-        Déplace les tuiles vers le bas.
-        :param grid: list
-        :return: mouvement, fusion, grid
+        Met à jour le score.
+        :param matrix: List
+        :return: score
         """
 
-        mouvement, fusion, hasfusion = {}, {}, {}
+        score = 0
 
-        # On parcourt la grille de bas en haut, de gauche à droite (l'inverse de move_up).
-        for x in range(2, -1, -1):
-            for y in range(4):
-                if grid[x][y] != 0:
+        for ligne in matrix:
+            for elem in ligne:
+                score += elem
+        return score
 
-                    prev_x = x + 1
-                    while prev_x <= 3 and grid[prev_x][y] == 0:
-                        prev_x += 1
-
-                    if prev_x <= 3 and grid[prev_x][y] == grid[x][y] and (prev_x, y) not in hasfusion:
-                        grid[prev_x][y] *= 2
-                        grid[x][y] = 0
-                        fusion[(x, y), (prev_x, y)] = (prev_x, y)
-                        hasfusion[(prev_x, y)] = True
-                    else:
-                        if prev_x != x + 1:
-                            grid[prev_x - 1][y] = grid[x][y]
-                            grid[x][y] = 0
-                            mouvement[(x, y)] = (prev_x - 1, y)
-
-        if fusion or mouvement != {}:
-            self["generate_new_tile"](grid)
-
-        return [mouvement, fusion, grid]
-
-    def move_left(grid: list):
+    def move(matrix: list, direction: str):
         """
-        Déplace les tuiles vers la gauche.
-        :param grid: list
-        :return: mouvement, fusion, grid
+        Déplace les tuiles dans la direction donnée.
+        :param matrix: List
+        :param direction: str
+        :return: mouvement, fusion, matrix
         """
 
-        mouvement, fusion, hasfusion = {}, {}, {}
+        data = {
+            "mouvement": {},
+            "fusion": {},
+        }
 
-        # On parcourt la grille de gauche à droite, de haut en bas.
-        for x in range(4):
-            for y in range(1, 4):
-                if grid[x][y] != 0:
+        if check_win(matrix):
+            return [data, matrix]
+        elif check_lose(matrix):
+            return [data, matrix]
 
-                    prev_y = y - 1
-                    while prev_y >= 0 and grid[x][prev_y] == 0:
-                        prev_y -= 1
+        # On récupère les informations de la direction donnée.
+        info = config[direction]
+        # On récupère les coordonnées de départ et d'arrivée.
+        dx, dy = info["dx"], info["dy"]
+        x_start, x_end, x_step = info["x_start"], info["x_end"], info["x_step"]
+        y_start, y_end, y_step = info["y_start"], info["y_end"], info["y_step"]
 
-                    if prev_y >= 0 and grid[x][prev_y] == grid[x][y] and (x, prev_y) not in hasfusion:
-                        grid[x][prev_y] *= 2
-                        grid[x][y] = 0
-                        fusion[(x, y), (x, prev_y)] = (x, prev_y)
-                        hasfusion[(x, prev_y)] = True
-                    else:
-                        if prev_y != y - 1:
-                            grid[x][prev_y + 1] = grid[x][y]
-                            grid[x][y] = 0
-                            mouvement[(x, y)] = (x, prev_y + 1)
+        # On parcourt la grille.
+        for x in range(x_start, x_end, x_step):
+            for y in range(y_start, y_end, y_step):
 
-        if fusion or mouvement != {}:
-            self["generate_new_tile"](grid)
+                # On définit les variables qui vont nous permettre de parcourir la matrice dans la direction donnée.
+                prev_x, prev_y = x + dx, y + dy
 
-        return [mouvement, fusion, grid]
+                # Tant que la case précédente est vide, on continue de parcourir la matrice dans la direction donnée.
+                while (0 <= prev_x < 4 and 0 <= prev_y < 4) and matrix[prev_x][prev_y] == 0:
+                    prev_x, prev_y = prev_x + dx, prev_y + dy
 
-    def move_right(grid: list):
-        mouvement, fusion, hasfusion = {}, {}, {}
+                # Si la case précédente est égale à la case actuelle et qu'elle n'a pas déjà fusionné, on fusionne
+                # les deux cases.
+                if (0 <= prev_x < 4 and 0 <= prev_y < 4) and matrix[prev_x][prev_y] == matrix[x][y] and (
+                        prev_x, prev_y) not in data["fusion"]:
+                    matrix[prev_x][prev_y] *= 2
+                    matrix[x][y] = 0
 
-        # On parcourt la grille de droite à gauche, de haut en bas.
-        for x in range(4):
-            for y in range(2, -1, -1):
-                if grid[x][y] != 0:
+                    # On stocke les coordonnées de la case qui a fusionné.
+                    data["fusion"][(prev_x, prev_y)] = (x, y)
 
-                    prev_y = y + 1
-                    while prev_y <= 3 and grid[x][prev_y] == 0:
-                        prev_y += 1
+                # Sinon, on déplace la case actuelle vers la première case vide au-dessus.
+                else:
+                    if (prev_x - dx, prev_y - dy) != (x, y):
+                        matrix[prev_x - dx][prev_y - dy] = matrix[x][y]
+                        matrix[x][y] = 0
+                        data["mouvement"][(x, y)] = (prev_x - dx, prev_y - dy)
 
-                    if prev_y <= 3 and grid[x][prev_y] == grid[x][y] and (x, prev_y) not in hasfusion:
-                        grid[x][prev_y] *= 2
-                        grid[x][y] = 0
-                        fusion[(x, y), (x, prev_y)] = (x, prev_y)
-                        hasfusion[(x, prev_y)] = True
-                    else:
-                        if prev_y != y + 1:
-                            grid[x][prev_y - 1] = grid[x][y]
-                            grid[x][y] = 0
-                            mouvement[(x, y)] = (x, prev_y - 1)
+        # Génère une nouvelle tuile si une fusion ou un mouvement a eu lieu
+        if data["mouvement"] or data["fusion"]:
+            generate_new_tile(matrix)
 
-        if fusion or mouvement != {}:
-            self["generate_new_tile"](grid)
+        return [data, matrix]
 
-        return [mouvement, fusion, grid]
+    def save(matrix: list):
+        """
+        Sauvegarde la partie en cours.
+        :param matrix: list
+        :return: None
+        """
+
+        # On crée un dictionnaire qui va nous permettre de stocker les informations de la partie.
+        data = {
+            "matrix": matrix
+        }
+
+        # On ouvre l'explorateur de fichier.
+        file = asksaveasfile(mode="w", defaultextension=".json", filetypes=[("JSON", "*.json")],
+                             initialfile=f"2048_{datetime.now().strftime('%d-%m-%Y_%H-%M-%S')}",
+                             title="Sauvegarder la partie")
+
+        # On sauvegarde les informations de la partie.
+        with open(file.name, "w") as f:
+            json.dump(data, f)
+
+    def load():
+        """
+        Charge une partie sauvegardée.
+        :return: Matrix
+        """
+
+        # On ouvre l'explorateur de fichier.
+        file = askopenfile(mode="r", defaultextension=".txt", filetypes=[("JSON", "*.json")],
+                           title="Charger une partie sauvegardée")
+
+        # On charge les informations de la partie sauvegardée.
+        with open(file.name, "r") as f:
+            info = json.load(f)
+
+        return info["matrix"]
+
+    config = {
+        "up": {"dx": -1, "dy": 0, "x_start": 1, "x_end": 4, "x_step": 1, "y_start": 0, "y_end": 4, "y_step": 1},
+        "down": {"dx": 1, "dy": 0, "x_start": 2, "x_end": -1, "x_step": -1, "y_start": 0, "y_end": 4, "y_step": 1},
+        "left": {"dx": 0, "dy": -1, "x_start": 0, "x_end": 4, "x_step": 1, "y_start": 1, "y_end": 4, "y_step": 1},
+        "right": {"dx": 0, "dy": 1, "x_start": 0, "x_end": 4, "x_step": 1, "y_start": 2, "y_end": -1, "y_step": -1},
+    }
 
     self = {
         "start": start,
-        "new_game": new_game,
-        "generate_new_tile": generate_new_tile,
-        "is_win": is_win,
-        "move_up": move_up,
-        "move_down": move_down,
-        "move_left": move_left,
-        "move_right": move_right
+        "move": move,
+        "update_score": update_score,
+        "save": save,
+        "load": load,
     }
 
     return self
-
 
 def rgb_to_tkinter(rgb: tuple[int, int, int]):
     """translates an rgb tuple of int to a tkinter friendly color code
