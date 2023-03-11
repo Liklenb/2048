@@ -100,7 +100,7 @@ def Grid():
 
                     # On vérifie si la case est vide ou si la valeur de la case est égale à la valeur de la case
                     # adjacente.
-                    if matrix[x][y] == matrix[x + dx][y + dy] or matrix[x + dx][y + dy] == 0:
+                    if matrix[x][y] == matrix[x + dx][y + dy]:
                         return False
 
         return True
@@ -132,12 +132,12 @@ def Grid():
             "fusion": [],
         }
 
-        pos = []
-
         if check_win(matrix):
             return [data, matrix]
         elif check_lose(matrix):
             return [data, matrix]
+
+        pos = []
 
         # On récupère les informations de la direction donnée.
         info = config[direction]
@@ -150,19 +150,15 @@ def Grid():
         for x in range(x_start, x_end, x_step):
             for y in range(y_start, y_end, y_step):
 
+                if matrix[x][y] == 0:
+                    continue
+
                 # On définit les variables qui vont nous permettre de parcourir la matrice dans la direction donnée.
                 prev_x, prev_y = x + dx, y + dy
 
                 # Tant que la case précédente est vide, on continue de parcourir la matrice dans la direction donnée.
                 while (0 <= prev_x < 4 and 0 <= prev_y < 4) and matrix[prev_x][prev_y] == 0:
                     prev_x, prev_y = prev_x + dx, prev_y + dy
-
-                # On stocke les coordonnées des cases qui ont fusionné.
-                if data["fusion"]:
-                    for i in range(len(data["fusion"])):
-                        if data["fusion"][i]["to"] in pos:
-                            continue
-                        pos.append(data["fusion"][i]["to"])
 
                 # Si la case précédente est égale à la case actuelle et qu'elle n'a pas déjà fusionné, on fusionne
                 # les deux cases.
@@ -173,6 +169,7 @@ def Grid():
 
                     # On stocke les coordonnées de la case qui a fusionné.
                     data["fusion"].append({"from": (x, y), "to": (prev_x, prev_y)})
+                    pos.append((prev_x, prev_y))
 
                 # Sinon, on déplace la case actuelle vers la première case vide au-dessus.
                 else:
@@ -215,7 +212,7 @@ def Grid():
         """
 
         # On ouvre l'explorateur de fichier.
-        file = askopenfile(mode="r", defaultextension=".txt", filetypes=[("JSON", "*.json")],
+        file = askopenfile(mode="r", defaultextension=".json", filetypes=[("JSON", "*.json")],
                            title="Charger une partie sauvegardée")
 
         # On charge les informations de la partie sauvegardée.
