@@ -14,77 +14,62 @@ def Grid():
     Fonction regroupant toutes les fonctions invisibles à la grille de jeu.
     """
 
-    def start(matrix: list):
+    def start():
         """
         Génère deux tuiles de valeur 2 ou 4 aléatoirement sur la grille.
-        :param matrix: List
-        :return: matrix
         """
 
-        # On génère deux tuiles aléatoirement.
         for i in range(2):
-            generate_new_tile(matrix)
+            generate_new_tile(get_empty_tiles())
 
-        return matrix
-
-    def get_empty_tiles(matrix: list):
+    def get_empty_tiles() -> list:
         """
         Récupère les positions vides de la grille.
-        :param matrix: List
         :return: pos
         """
 
         pos = []
         for x in range(4):
             for y in range(4):
-                if matrix[x][y] == 0:
+                if self["matrix"][x][y] == 0:
                     pos.append((x, y))
         return pos
 
-    def generate_new_tile(matrix: list):
+    def generate_new_tile(empty_tiles: list):
         """
         Génère une nouvelle tuile de valeur 2 ou 4 aléatoirement sur la grille.
-        :param matrix: List
-        :return: matrix
+        :param empty_tiles:
         """
 
-        # On récupère les positions vides de la grille et on les stocke.
-        pos = get_empty_tiles(matrix)
-
-        # On choisit aléatoirement une position vide et on génère une tuile de valeur 2 ou 4.
-        if pos:
-            x, y = pos[randint(0, len(pos) - 1)]
+        if empty_tiles:
+            x, y = empty_tiles[randint(0, len(empty_tiles) - 1)]
             if random() < 0.9:
-                matrix[x][y] = 2
+                self["matrix"][x][y] = 2
             else:
-                matrix[x][y] = 4
+                self["matrix"][x][y] = 4
 
-        return matrix
-
-    def check_win(matrix: list):
+    def check_win() -> bool:
         """
         Vérifie si la partie est gagnée.
-        :param matrix: List
         :return: bool
         """
 
-        for ligne in matrix:
-            for elem in ligne:
+        for row in self["matrix"]:
+            for elem in row:
                 if elem == 2048:
                     return True
         return False
 
-    def check_lose(matrix: list):
+    def check_lose(empty_tiles: list) -> bool:
         """
         Vérifie si on peut faire un mouvement dans la direction donnée.
-        :param matrix: List
+        :param empty_tiles:
         :return: bool
         """
 
-        if get_empty_tiles(matrix):
+        if empty_tiles:
             return False
 
-        # On vérifie si on peut faire un mouvement dans la direction donnée.
         for direction in config:
 
             # On récupère les coordonnées de départ et d'arrivée.
@@ -100,31 +85,29 @@ def Grid():
 
                     # On vérifie si la case est vide ou si la valeur de la case est égale à la valeur de la case
                     # adjacente.
-                    if matrix[x][y] == matrix[x + dx][y + dy]:
+                    if self["matrix"][x][y] == self["matrix"][x + dx][y + dy]:
                         return False
 
         return True
 
-    def update_score(matrix: list):
+    def update_score() -> int:
         """
         Met à jour le score.
-        :param matrix: List
         :return: score
         """
 
         score = 0
 
-        for ligne in matrix:
-            for elem in ligne:
+        for row in self["matrix"]:
+            for elem in row:
                 score += elem
         return score
 
-    def move(matrix: list, direction: str):
+    def move(direction: str) -> dict:
         """
         Déplace les tuiles dans la direction donnée.
-        :param matrix: List
         :param direction: str
-        :return: mouvement, fusion, matrix
+        :return: data
         """
 
         data = {
@@ -132,10 +115,12 @@ def Grid():
             "fusion": [],
         }
 
-        if check_win(matrix):
-            return [data, matrix]
-        elif check_lose(matrix):
-            return [data, matrix]
+        empty_tiles = get_empty_tiles()
+
+        if check_win():
+            return data
+        elif check_lose(empty_tiles):
+            return data
 
         pos = []
 
@@ -150,22 +135,23 @@ def Grid():
         for x in range(x_start, x_end, x_step):
             for y in range(y_start, y_end, y_step):
 
-                if matrix[x][y] == 0:
+                if self["matrix"][x][y] == 0:
                     continue
 
                 # On définit les variables qui vont nous permettre de parcourir la matrice dans la direction donnée.
                 prev_x, prev_y = x + dx, y + dy
 
                 # Tant que la case précédente est vide, on continue de parcourir la matrice dans la direction donnée.
-                while (0 <= prev_x < 4 and 0 <= prev_y < 4) and matrix[prev_x][prev_y] == 0:
+                while (0 <= prev_x < 4 and 0 <= prev_y < 4) and self["matrix"][prev_x][prev_y] == 0:
                     prev_x, prev_y = prev_x + dx, prev_y + dy
 
                 # Si la case précédente est égale à la case actuelle et qu'elle n'a pas déjà fusionné, on fusionne
                 # les deux cases.
-                if (0 <= prev_x < 4 and 0 <= prev_y < 4) and matrix[prev_x][prev_y] == matrix[x][y] and (
+                if (0 <= prev_x < 4 and 0 <= prev_y < 4) and self["matrix"][prev_x][prev_y] == self["matrix"][x][
+                    y] and (
                         prev_x, prev_y) not in pos:
-                    matrix[prev_x][prev_y] *= 2
-                    matrix[x][y] = 0
+                    self["matrix"][prev_x][prev_y] *= 2
+                    self["matrix"][x][y] = 0
 
                     # On stocke les coordonnées de la case qui a fusionné.
                     data["fusion"].append({"from": (x, y), "to": (prev_x, prev_y)})
@@ -174,26 +160,24 @@ def Grid():
                 # Sinon, on déplace la case actuelle vers la première case vide au-dessus.
                 else:
                     if (prev_x - dx, prev_y - dy) != (x, y):
-                        matrix[prev_x - dx][prev_y - dy] = matrix[x][y]
-                        matrix[x][y] = 0
+                        self["matrix"][prev_x - dx][prev_y - dy] = self["matrix"][x][y]
+                        self["matrix"][x][y] = 0
                         data["mouvement"].append({"from": (x, y), "to": (prev_x - dx, prev_y - dy)})
 
         # Génère une nouvelle tuile si une fusion ou un mouvement a eu lieu
         if data["mouvement"] or data["fusion"]:
-            generate_new_tile(matrix)
+            generate_new_tile(empty_tiles)
 
-        return [data, matrix]
+        return data
 
-    def save(matrix: list):
+    def save():
         """
         Sauvegarde la partie en cours.
-        :param matrix: list
-        :return: None
         """
 
         # On crée un dictionnaire qui va nous permettre de stocker les informations de la partie.
         data = {
-            "matrix": matrix
+            "matrix": self["matrix"]
         }
 
         # On ouvre l'explorateur de fichier.
@@ -208,7 +192,6 @@ def Grid():
     def load():
         """
         Charge une partie sauvegardée.
-        :return: Matrix
         """
 
         # On ouvre l'explorateur de fichier.
@@ -219,7 +202,8 @@ def Grid():
         with open(file.name, "r") as f:
             info = json.load(f)
 
-        return info["matrix"]
+        # On met à jour les informations de la partie.
+        self["matrix"] = info["matrix"]
 
     config = {
         "up": {"dx": -1, "dy": 0, "x_start": 1, "x_end": 4, "x_step": 1, "y_start": 0, "y_end": 4, "y_step": 1},
@@ -229,6 +213,7 @@ def Grid():
     }
 
     self = {
+        "matrix": [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
         "start": start,
         "move": move,
         "update_score": update_score,
