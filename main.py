@@ -8,21 +8,20 @@ from tkinter.filedialog import asksaveasfile, askopenfile
 import json
 from datetime import datetime
 
-
 def Grid():
     """
     Fonction regroupant toutes les fonctions invisibles à la grille de jeu.
     """
 
-    def start():
+    def start(self: dict):
         """
         Génère deux tuiles de valeur 2 ou 4 aléatoirement sur la grille.
         """
 
         for i in range(2):
-            generate_new_tile(get_empty_tiles())
+            generate_new_tile(self, get_empty_tiles(self))
 
-    def get_empty_tiles() -> list:
+    def get_empty_tiles(self: dict) -> list:
         """
         Récupère les positions vides de la grille.
         :return: pos
@@ -35,7 +34,7 @@ def Grid():
                     pos.append((x, y))
         return pos
 
-    def generate_new_tile(empty_tiles: list):
+    def generate_new_tile(self: dict, empty_tiles: list):
         """
         Génère une nouvelle tuile de valeur 2 ou 4 aléatoirement sur la grille.
         :param empty_tiles:
@@ -48,7 +47,7 @@ def Grid():
             else:
                 self["matrix"][x][y] = 4
 
-    def check_win() -> bool:
+    def check_win(self: dict) -> bool:
         """
         Vérifie si la partie est gagnée.
         :return: bool
@@ -60,7 +59,7 @@ def Grid():
                     return True
         return False
 
-    def check_lose(empty_tiles: list) -> bool:
+    def check_lose(self: dict, empty_tiles: list) -> bool:
         """
         Vérifie si on peut faire un mouvement dans la direction donnée.
         :param empty_tiles:
@@ -90,7 +89,7 @@ def Grid():
 
         return True
 
-    def update_score() -> int:
+    def update_score(self: dict) -> int:
         """
         Met à jour le score.
         :return: score
@@ -103,7 +102,7 @@ def Grid():
                 score += elem
         return score
 
-    def move(direction: str) -> dict:
+    def move(self: dict, direction: str) -> dict:
         """
         Déplace les tuiles dans la direction donnée.
         :param direction: str
@@ -115,11 +114,11 @@ def Grid():
             "fusion": [],
         }
 
-        empty_tiles = get_empty_tiles()
+        empty_tiles = get_empty_tiles(self)
 
-        if check_win():
+        if check_win(self):
             return data
-        elif check_lose(empty_tiles):
+        elif check_lose(self, empty_tiles):
             return data
 
         pos = []
@@ -147,8 +146,7 @@ def Grid():
 
                 # Si la case précédente est égale à la case actuelle et qu'elle n'a pas déjà fusionné, on fusionne
                 # les deux cases.
-                if (0 <= prev_x < 4 and 0 <= prev_y < 4) and self["matrix"][prev_x][prev_y] == self["matrix"][x][
-                    y] and (
+                if (0 <= prev_x < 4 and 0 <= prev_y < 4) and self["matrix"][prev_x][prev_y] == self["matrix"][x][y] and (
                         prev_x, prev_y) not in pos:
                     self["matrix"][prev_x][prev_y] *= 2
                     self["matrix"][x][y] = 0
@@ -166,11 +164,11 @@ def Grid():
 
         # Génère une nouvelle tuile si une fusion ou un mouvement a eu lieu
         if data["mouvement"] or data["fusion"]:
-            generate_new_tile(empty_tiles)
+            generate_new_tile(self, empty_tiles)
 
         return data
 
-    def save():
+    def save(self: dict):
         """
         Sauvegarde la partie en cours.
         """
@@ -189,7 +187,7 @@ def Grid():
         with open(file.name, "w") as f:
             json.dump(data, f)
 
-    def load():
+    def load(self: dict):
         """
         Charge une partie sauvegardée.
         """
@@ -204,6 +202,7 @@ def Grid():
 
         # On met à jour les informations de la partie.
         self["matrix"] = info["matrix"]
+
 
     config = {
         "up": {"dx": -1, "dy": 0, "x_start": 1, "x_end": 4, "x_step": 1, "y_start": 0, "y_end": 4, "y_step": 1},
