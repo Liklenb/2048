@@ -443,7 +443,6 @@ def Game(root: tkinter.Tk):
     update(self)
 
     # make a score
-    self["grid"]["score"] = 0
     self["score"] = self["canvas"].create_text(root.winfo_width() // 2, root.winfo_height() // 4.5, anchor="n",
                                                text="Score : " + str(self["grid"]["score"]), font='Helvetica 30 bold',
                                                fill="#776e65")
