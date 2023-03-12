@@ -47,7 +47,8 @@ def Grid():
                 self["matrix"][x][y] = 2
             else:
                 self["matrix"][x][y] = 4
-            print(f"Tuile générée en {x}, {y}")
+
+            self["score"] += self["matrix"][x][y]
 
     def check_win(self: dict) -> bool:
         """
@@ -90,19 +91,6 @@ def Grid():
                         return False
 
         return True
-
-    def update_score(self: dict) -> int:
-        """
-        Met à jour le score.
-        :return: score
-        """
-
-        score = 0
-
-        for row in self["matrix"]:
-            for elem in row:
-                score += elem
-        return score
 
     def move(self: dict, direction: str) -> dict:
         """
@@ -215,9 +203,9 @@ def Grid():
 
     self = {
         "matrix": [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+        "score": 0,
         "start": start,
         "move": move,
-        "update_score": update_score,
         "save": save,
         "load": load
     }
@@ -416,28 +404,30 @@ def Game(root: tkinter.Tk):
                 if self["grid"]["matrix"][i][j] == 0:
                     self["tiles"][i][j] = round_rectangle(self["canvas"],
                                                           int(center - (1.5 * padding + 2 * size) + i * (
-                                                                      size + padding)),
+                                                                  size + padding)),
                                                           height + j * (size + padding) + padding,
                                                           int(center - (1.5 * padding + 2 * size) + i * (
-                                                                      size + padding) + size),
+                                                                  size + padding) + size),
                                                           height + j * (size + padding) + size + padding,
                                                           fill="#cdc1b4", outline="#cdc1b4", radius=10)
                 else:
                     # self["canvas"].itemconfig(self["tiles"][i][j], text=self["grid"]["matrix"][i][j])
                     self["tiles"][i][j] = round_rectangle(self["canvas"],
                                                           int(center - (1.5 * padding + 2 * size) + i * (
-                                                                      size + padding)),
+                                                                  size + padding)),
                                                           height + j * (size + padding) + padding,
                                                           int(center - (1.5 * padding + 2 * size) + i * (
-                                                                      size + padding) + size),
+                                                                  size + padding) + size),
                                                           height + j * (size + padding) + size + padding,
                                                           fill=self["color"][self["grid"]["matrix"][i][j]],
                                                           outline=self["color"][self["grid"]["matrix"][i][j]],
                                                           radius=10)
-                    self["canvas"].create_text(int(center - (1.5 * padding + 2 * size) + i * (size + padding) + size // 2),
-                                               height + j * (size + padding) + padding + size // 2,
-                                               text=self["grid"]["matrix"][i][j], font='Helvetica 40 bold',
-                                               fill="#776e65")
+                    self["canvas"].create_text(
+                        int(center - (1.5 * padding + 2 * size) + i * (size + padding) + size // 2),
+                        height + j * (size + padding) + padding + size // 2,
+                        text=self["grid"]["matrix"][i][j], font='Helvetica 40 bold',
+                        fill="#776e65")
+
     # make tiles move with Grid()
     # get the move() function from Grid()
     self["grid"] = Grid()
@@ -452,11 +442,11 @@ def Game(root: tkinter.Tk):
 
     update(self)
 
-    #make a score
+    # make a score
     self["score"] = 0
-    self["score"] = self["canvas"].create_text(root.winfo_width() // 2, root.winfo_height() // 4.5, anchor="n", text="Score : " + str(self["score"]), font='Helvetica 50 bold',
-                                    fill="#776e65")
-    
+    self["score"] = self["canvas"].create_text(root.winfo_width() // 2, root.winfo_height() // 4.5, anchor="n",
+                                               text="Score : " + str(self["score"]), font='Helvetica 50 bold',
+                                               fill="#776e65")
 
     # functions for the keys
 
@@ -466,8 +456,9 @@ def Game(root: tkinter.Tk):
         update(self)
         # update the score
         self["canvas"].delete(self["score"])
-        self["score"] = self["canvas"].create_text(root.winfo_width() // 2, root.winfo_height() // 4.5, anchor="n", text="Score : " + str(self["score"]), font='Helvetica 50 bold',
-                                    fill="#776e65")
+        self["score"] = self["canvas"].create_text(root.winfo_width() // 2, root.winfo_height() // 4.5, anchor="n",
+                                                   text="Score : " + str(self["score"]), font='Helvetica 50 bold',
+                                                   fill="#776e65")
 
     # bind the keys
     root.bind("<KeyPress-Up>", lambda event: action(self, "left"))
@@ -475,7 +466,6 @@ def Game(root: tkinter.Tk):
     root.bind("<KeyPress-Left>", lambda event: action(self, "up"))
     root.bind("<KeyPress-Right>", lambda event: action(self, "down"))
     print("jeu : ", self["grid"]["matrix"])
-
 
 
 def main():
