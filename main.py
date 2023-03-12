@@ -443,9 +443,9 @@ def Game(root: tkinter.Tk):
     update(self)
 
     # make a score
-    self["score"] = 0
+    self["grid"]["score"] = 0
     self["score"] = self["canvas"].create_text(root.winfo_width() // 2, root.winfo_height() // 4.5, anchor="n",
-                                               text="Score : " + str(self["score"]), font='Helvetica 50 bold',
+                                               text="Score : " + str(self["grid"]["score"]), font='Helvetica 50 bold',
                                                fill="#776e65")
 
     # functions for the keys
@@ -457,7 +457,7 @@ def Game(root: tkinter.Tk):
         # update the score
         self["canvas"].delete(self["score"])
         self["score"] = self["canvas"].create_text(root.winfo_width() // 2, root.winfo_height() // 4.5, anchor="n",
-                                                   text="Score : " + str(self["score"]), font='Helvetica 50 bold',
+                                                   text="Score : " + str(self["grid"]["score"]), font='Helvetica 50 bold',
                                                    fill="#776e65")
 
     # bind the keys
