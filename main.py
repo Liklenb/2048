@@ -434,7 +434,10 @@ def Game(root: tkinter.Tk):
                                                           fill=self["color"][self["grid"]["matrix"][i][j]],
                                                           outline=self["color"][self["grid"]["matrix"][i][j]],
                                                           radius=10)
-
+                    self["canvas"].create_text(int(center - (1.5 * padding + 2 * size) + i * (size + padding) + size // 2),
+                                               height + j * (size + padding) + padding + size // 2,
+                                               text=self["grid"]["matrix"][i][j], font='Helvetica 40 bold',
+                                               fill="#776e65")
     # make tiles move with Grid()
     # get the move() function from Grid()
     self["grid"] = Grid()
