@@ -450,7 +450,7 @@ def Game(root: tkinter.Tk):
         update(self)
 
 
-    # bind the keys to the functions
+    # bind the keys
     root.bind("<KeyPress-Up>", lambda event: action(self, "left"))
     root.bind("<KeyPress-Down>", lambda event: action(self, "right"))
     root.bind("<KeyPress-Left>", lambda event: action(self, "up"))
