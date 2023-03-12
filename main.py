@@ -452,12 +452,22 @@ def Game(root: tkinter.Tk):
 
     update(self)
 
+    #make a score
+    self["score"] = 0
+    self["score"] = self["canvas"].create_text(root.winfo_width() // 2, root.winfo_height() // 4.5, anchor="n", text="Score : " + str(self["score"]), font='Helvetica 50 bold',
+                                    fill="#776e65")
+    
+
     # functions for the keys
 
     def action(self, direction):
         self["grid"]["move"](self["grid"], direction)
         print(direction, self["grid"]["matrix"])
         update(self)
+        # update the score
+        self["canvas"].delete(self["score"])
+        self["score"] = self["canvas"].create_text(root.winfo_width() // 2, root.winfo_height() // 4.5, anchor="n", text="Score : " + str(self["score"]), font='Helvetica 50 bold',
+                                    fill="#776e65")
 
     # bind the keys
     root.bind("<KeyPress-Up>", lambda event: action(self, "left"))
@@ -466,11 +476,6 @@ def Game(root: tkinter.Tk):
     root.bind("<KeyPress-Right>", lambda event: action(self, "down"))
     print("jeu : ", self["grid"]["matrix"])
 
-
-    # make the score text
-    self["score_text"] = self["canvas"].create_text(root.winfo_width() // 2, root.winfo_height() // 3.5 - 35,
-                                                    anchor="n", text="Score : 0", font='Helvetica 30 bold',
-                                                    fill="#776e65")
 
 
 def main():
