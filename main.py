@@ -337,7 +337,7 @@ def BetterButton(canvas: tkinter.Canvas,
     self["text_size"] = self["font"].measure(self["text"]), self["font"].metrics("linespace")
 
     if size:
-        padding = size[0] - self["text_size"][0], size[1] - self["text_size"][1]
+        self["padding"] = size[0] - self["text_size"][0], size[1] - self["text_size"][1]
     self["size"] = self["text_size"][0] + padding[0], self["text_size"][1] + padding[1]
     self["x"], self["y"] = self["get_anchor_position"](self, self["x"], self["y"])
     self["build"](self)
@@ -356,9 +356,8 @@ def Menu(root: tkinter.Tk):
     BetterButton(self["canvas"], int(root.winfo_width() // 1.96), int(root.winfo_height() // 1.90), "Jouer", anchor="n",
                  size=(200, 50), command=lambda: Game(root), text_color=(255, 255, 255), color=(119, 110, 101),
                  hover_color=(150, 140, 130))
-    BetterButton(self["canvas"], int(root.winfo_width() // 1.96), int(root.winfo_height() // 1.75), "Options",
+    BetterButton(self["canvas"], int(root.winfo_width() // 2), int(root.winfo_height() // 1.75), "Options",
                  anchor="n",
-                 size=(200, 50),
                  text_color=(255, 255, 255), color=(119, 110, 101), hover_color=(150, 140, 130))
     BetterButton(self["canvas"], int(root.winfo_width() // 1.96), int(root.winfo_height() // 1.60), "Quitter",
                  anchor="n",
