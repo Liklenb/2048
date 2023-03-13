@@ -338,7 +338,7 @@ def BetterButton(canvas: tkinter.Canvas,
 
     if size:
         self["padding"] = size[0] - self["text_size"][0], size[1] - self["text_size"][1]
-    self["size"] = self["text_size"][0] + padding[0], self["text_size"][1] + padding[1]
+    self["size"] = self["text_size"][0] + self["padding"][0], self["text_size"][1] + self["padding"][1]
     self["x"], self["y"] = self["get_anchor_position"](self, self["x"], self["y"])
     self["build"](self)
 
@@ -353,7 +353,7 @@ def Menu(root: tkinter.Tk):
     self["canvas"].pack()
     self["canvas"].create_text(root.winfo_width() // 2, 20, anchor="n", text="2048", font='Helvetica 80 bold',
                                fill="#776e65")
-    BetterButton(self["canvas"], int(root.winfo_width() // 1.96), int(root.winfo_height() // 1.90), "Jouer", anchor="n",
+    BetterButton(self["canvas"], int(root.winfo_width() // 2), int(root.winfo_height() // 1.90), "Jouer", anchor="n",
                  size=(200, 50), command=lambda: Game(root), text_color=(255, 255, 255), color=(119, 110, 101),
                  hover_color=(150, 140, 130))
     BetterButton(self["canvas"], int(root.winfo_width() // 2), int(root.winfo_height() // 1.75), "Options",
