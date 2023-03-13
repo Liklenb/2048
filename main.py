@@ -174,6 +174,10 @@ def Grid():
                              initialfile=f"2048_{datetime.now().strftime('%d-%m-%Y_%H-%M-%S')}",
                              title="Sauvegarder la partie")
 
+        # Si l'utilisateur annule, on arrête la fonction.
+        if file is None:
+            return
+
         # On sauvegarde les informations de la partie.
         with open(file.name, "w") as f:
             json.dump(data, f)
@@ -187,9 +191,17 @@ def Grid():
         file = askopenfile(mode="r", defaultextension=".json", filetypes=[("JSON", "*.json")],
                            title="Charger une partie sauvegardée")
 
+        # Si l'utilisateur annule, on arrête la fonction.
+        if file is None or "matrix":
+            return
+
         # On charge les informations de la partie sauvegardée.
         with open(file.name, "r") as f:
             info = json.load(f)
+
+        # Si la partie sauvegardée n'est pas valide, on arrête la fonction.
+        if "matrix" not in info:
+            return
 
         # On met à jour les informations de la partie.
         self["matrix"] = info["matrix"]
