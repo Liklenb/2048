@@ -351,19 +351,25 @@ def Menu(root: tkinter.Tk):
     self["frame"].grid(row=0, column=0)
     self["canvas"] = tkinter.Canvas(self["frame"], width=root.winfo_width(), height=root.winfo_height(), bg="#a39489")
     self["canvas"].pack()
+    self["grid"] = Grid()
     self["canvas"].create_text(root.winfo_width() // 2, 20, anchor="n", text="2048", font='Helvetica 80 bold',
                                fill="#776e65")
-    BetterButton(self["canvas"], int(root.winfo_width() // 2), int(root.winfo_height() // 1.90), "Jouer", anchor="n",
+    BetterButton(self["canvas"], int(root.winfo_width() // 2), int(root.winfo_height() // 2.35), "Jouer", anchor="n",
                  size=(200, 50), command=lambda: Game(root), text_color=(255, 255, 255), color=(119, 110, 101),
                  hover_color=(150, 140, 130))
-    BetterButton(self["canvas"], int(root.winfo_width() // 2), int(root.winfo_height() // 1.75), "Options",
+    BetterButton(self["canvas"], int(root.winfo_width() // 2), int(root.winfo_height() // 2), "Options",
+                 size=(200, 50),
                  anchor="n",
                  text_color=(255, 255, 255), color=(119, 110, 101), hover_color=(150, 140, 130))
-    BetterButton(self["canvas"], int(root.winfo_width() // 1.96), int(root.winfo_height() // 1.60), "Quitter",
+    BetterButton(self["canvas"], int(root.winfo_width() // 2), int(root.winfo_height() // 1.75), "Quitter",
                  anchor="n",
                  size=(200, 50), command=root.destroy, text_color=(255, 255, 255), color=(119, 110, 101),
                  hover_color=(150, 140, 130))
-
+    #Button to load the game
+    BetterButton(self["canvas"], int(root.winfo_width() // 2), int(root.winfo_height() // 1.5), "Charger",
+                    anchor="n",
+                    size=(200, 50), command=lambda: self["grid"]["load"](self["grid"]) , text_color=(255, 255, 255), color=(119, 110, 101),
+                    hover_color=(150, 140, 130))
 
 # making the game window
 def Game(root: tkinter.Tk):
@@ -375,10 +381,10 @@ def Game(root: tkinter.Tk):
     self["canvas"].pack()
     self["canvas"].create_text(root.winfo_width() // 2, 20, anchor="n", text="2048", font='Helvetica 80 bold',
                                fill="#776e65")
-    BetterButton(self["canvas"], root.winfo_width() // 2, root.winfo_height() // 5, "Menu", anchor="e",
+    BetterButton(self["canvas"], int(root.winfo_width() // 2.2), root.winfo_height() // 5, "Menu", anchor="e",
                  size=(200, 50), command=lambda: Menu(root), text_color=(255, 255, 255), color=(119, 110, 101),
                  hover_color=(150, 140, 130))
-    BetterButton(self["canvas"], int(root.winfo_width() // 1.70), root.winfo_height() // 5, "Quitter", anchor="w",
+    BetterButton(self["canvas"], int(root.winfo_width() // 1.75), root.winfo_height() // 5, "Quitter", anchor="w",
                  size=(200, 50), command=root.destroy, text_color=(255, 255, 255), color=(119, 110, 101),
                  hover_color=(150, 140, 130))
 
@@ -427,6 +433,12 @@ def Game(root: tkinter.Tk):
                         text=self["grid"]["matrix"][i][j], font='Helvetica 40 bold',
                         fill="#776e65")
 
+
+    #Button to save the game
+    BetterButton(self["canvas"], int(root.winfo_width() // 1.20), int(root.winfo_height() // 1.5), "Sauvegarder",
+                 command=lambda: self["grid"]["save"](self["grid"]),
+                    size=(200, 50), anchor="n", text_color=(255, 255, 255), color=(119, 110, 101), hover_color=(150, 140, 130))
+
     # make tiles move with Grid()
     # get the move() function from Grid()
     self["grid"] = Grid()
@@ -460,17 +472,17 @@ def Game(root: tkinter.Tk):
 
     
     #make buttons for the keys
+    BetterButton(self["canvas"], int(center - (4 * padding + 5 * size)), height + 3 * (size + padding) + padding,
+                 "Gauche", size=(200, 50), command=lambda: action(self, "up"), text_color=(255, 255, 255),
+                 color=(119, 110, 101), hover_color=(150, 140, 130))
     BetterButton(self["canvas"], int(center - (1.5 * padding + 4 * size)), height + 3 * (size + padding) + padding,
-                 "Gauche", size=(size, size), command=lambda: action(self, "up"), text_color=(255, 255, 255),
+                 "Droite", size=(200, 50), command=lambda: action(self, "down"), text_color=(255, 255, 255),
                  color=(119, 110, 101), hover_color=(150, 140, 130))
-    BetterButton(self["canvas"], int(center - (1.5 * padding + 3 * size)), height + 3 * (size + padding) + padding,
-                 "Droite", size=(size, size), command=lambda: action(self, "down"), text_color=(255, 255, 255),
-                 color=(119, 110, 101), hover_color=(150, 140, 130))
-    BetterButton(self["canvas"], int(center - (2.5 * padding + 3.4 * size)), height + 2.5 * (size + padding) + padding,
-                    "Haut", size=(size, size), command=lambda: action(self, "left"), text_color=(255, 255, 255),
+    BetterButton(self["canvas"], int(center - (2.5 * padding + 4.7 * size)), int(height + 2.5 * (size + padding) + padding),
+                    "Haut", size=(200, 50), command=lambda: action(self, "left"), text_color=(255, 255, 255),
                     color=(119, 110, 101), hover_color=(150, 140, 130))
-    BetterButton(self["canvas"], int(center - (0.5 * padding + 3.6 * size)), height + 3.5 * (size + padding) + padding,
-                    "Bas", size=(size, size), command=lambda: action(self, "right"), text_color=(255, 255, 255),
+    BetterButton(self["canvas"], int(center - (0.5 * padding + 5 * size)), int(height + 3.5 * (size + padding) + padding),
+                    "Bas", size=(200, 50), command=lambda: action(self, "right"), text_color=(255, 255, 255),
                     color=(119, 110, 101), hover_color=(150, 140, 130))
 
     # bind the keys
