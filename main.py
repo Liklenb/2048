@@ -347,6 +347,7 @@ def BetterButton(canvas: tkinter.Canvas,
 
 # making the menu
 def Menu(root: tkinter.Tk):
+    "Fait une fenetre Menu grâce à Tkinter. "
     self = {"frame": tkinter.Frame(root)}
     self["frame"].grid(row=0, column=0)
     self["canvas"] = tkinter.Canvas(self["frame"], width=root.winfo_width(), height=root.winfo_height(), bg="#a39489")
@@ -373,6 +374,7 @@ def Menu(root: tkinter.Tk):
 
 # making the game window
 def Game(root: tkinter.Tk):
+    "Fait une fentre de jeu grâce à Tkinter."
     self = {
         "frame": tkinter.Frame(root)
     }
@@ -403,6 +405,7 @@ def Game(root: tkinter.Tk):
     # update the tiles with the right color and text when the matrix change
     # update the tiles with the new matrix
     def update(self):
+        "Met à jour les tuiles avec la nouvelle matrice en supprimant l'ancienne."
         for i in range(4):
             for j in range(4):
                 self["canvas"].delete(self["tiles"][i][j])
@@ -461,6 +464,7 @@ def Game(root: tkinter.Tk):
     # functions for the keys
 
     def action(self, direction):
+        "Fonction qui fait bouger les tuiles et qui met à jour le score."
         self["grid"]["move"](self["grid"], direction)
         print(direction, self["grid"]["matrix"])
         update(self)
