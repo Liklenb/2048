@@ -359,7 +359,7 @@ def BetterButton(canvas: tkinter.Canvas,
 
 # making the menu
 def Menu(root: tkinter.Tk):
-    "Fait une fenetre Menu grâce à Tkinter."
+    """Fait une fenetre Menu grâce à Tkinter."""
     self = {"frame": tkinter.Frame(root)}
     self["frame"].grid(row=0, column=0)
     self["canvas"] = tkinter.Canvas(self["frame"], width=root.winfo_width(), height=root.winfo_height(), bg="#a39489")
@@ -386,7 +386,7 @@ def Menu(root: tkinter.Tk):
 
 # making the game window
 def Game(root: tkinter.Tk):
-    "Fait une fentre de jeu grâce à Tkinter."
+    """Fait une fentre de jeu grâce à Tkinter."""
     self = {
         "frame": tkinter.Frame(root)
     }
@@ -395,10 +395,10 @@ def Game(root: tkinter.Tk):
     self["canvas"].pack()
     self["canvas"].create_text(root.winfo_width() // 2, 20, anchor="n", text="2048", font='Helvetica 80 bold',
                                fill="#776e65")
-    BetterButton(self["canvas"], int(root.winfo_width() // 2.2), root.winfo_height() // 5, "Menu", anchor="e",
+    BetterButton(self["canvas"], int(root.winfo_width() // 1.2), root.winfo_height() // 2, "Menu", anchor="n",
                  size=(200, 50), command=lambda: Menu(root), text_color=(255, 255, 255), color=(119, 110, 101),
                  hover_color=(150, 140, 130))
-    BetterButton(self["canvas"], int(root.winfo_width() // 1.75), root.winfo_height() // 5, "Quitter", anchor="w",
+    BetterButton(self["canvas"], int(root.winfo_width() // 1.2), root.winfo_height() // 1.75, "Quitter", anchor="n",
                  size=(200, 50), command=root.destroy, text_color=(255, 255, 255), color=(119, 110, 101),
                  hover_color=(150, 140, 130))
 
@@ -417,7 +417,7 @@ def Game(root: tkinter.Tk):
     # update the tiles with the right color and text when the matrix change
     # update the tiles with the new matrix
     def update(self):
-        "Met à jour les tuiles avec la nouvelle matrice en supprimant l'ancienne."
+        """Met à jour les tuiles avec la nouvelle matrice en supprimant l'ancienne."""
         for i in range(4):
             for j in range(4):
                 self["canvas"].delete(self["tiles"][i][j])
@@ -450,7 +450,7 @@ def Game(root: tkinter.Tk):
 
 
     #Button to save the game
-    BetterButton(self["canvas"], int(root.winfo_width() // 1.20), int(root.winfo_height() // 1.5), "Sauvegarder",
+    BetterButton(self["canvas"], int(root.winfo_width() // 1.20), int(root.winfo_height() // 1.55), "Sauvegarder",
                  command=lambda: self["grid"]["save"](self["grid"]),
                     size=(200, 50), anchor="n", text_color=(255, 255, 255), color=(119, 110, 101), hover_color=(150, 140, 130))
 
@@ -476,7 +476,7 @@ def Game(root: tkinter.Tk):
     # functions for the keys
 
     def action(self, direction):
-        "Fonction qui fait bouger les tuiles et qui met à jour le score."
+        """Fonction qui fait bouger les tuiles et qui met à jour le score."""
         self["grid"]["move"](self["grid"], direction)
         print(direction, self["grid"]["matrix"])
         update(self)
