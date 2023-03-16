@@ -359,7 +359,7 @@ def BetterButton(canvas: tkinter.Canvas,
 
 # making the menu
 def Menu(root: tkinter.Tk):
-    "Fait une fenetre Menu grâce à Tkinter. "
+    "Fait une fenetre Menu grâce à Tkinter."
     self = {"frame": tkinter.Frame(root)}
     self["frame"].grid(row=0, column=0)
     self["canvas"] = tkinter.Canvas(self["frame"], width=root.winfo_width(), height=root.winfo_height(), bg="#a39489")
