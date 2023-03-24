@@ -8,6 +8,7 @@ from tkinter.filedialog import asksaveasfile, askopenfile
 import json
 from datetime import datetime
 import math
+from PIL import Image, ImageTk
 
 
 def Grid():
@@ -370,6 +371,88 @@ def BetterButton(canvas: tkinter.Canvas,
     return self
 
 
+def IconButton(canvas: tkinter.Canvas,
+               x: int,
+               y: int,
+               icon: str,
+               hover_icon: str = None,
+               command=lambda: None,
+               size: tuple[int, int] = None,
+               border_radius: int = 50,
+               anchor: str = "nw", ):
+    self = {"canvas": canvas, "x": x, "y": y, "icon": icon,
+            "hover_icon": hover_icon, "command": command, "hover": False,
+            "border_radius": border_radius, "anchor": anchor, "size": size}
+
+    def hover_on(self: dict):
+        self["hover"] = True
+        self["canvas"].itemconfig(self["button"],
+                                  image=self["hover_textureTk"])
+
+    def hover_off(self: dict):
+        self["hover"] = False
+        self["canvas"].itemconfig(self["button"],
+                                  image=self["textureTk"])
+
+    def click(self: dict):
+        if self["hover"]:
+            self["command"]()
+
+    def get_anchor_position(self: dict, x: int, y: int):
+        if self["anchor"] == "center":
+            x -= self["size"][0] / 2
+            y -= self["size"][1] / 2
+        elif self["anchor"] == "ne":
+            x -= self["size"][0]
+        elif self["anchor"] == "se":
+            x -= self["size"][0]
+            y -= self["size"][1]
+        elif self["anchor"] == "sw":
+            y -= self["size"][1]
+        elif self["anchor"] == "e":
+            x -= self["size"][0]
+            y -= self["size"][1] / 2
+        elif self["anchor"] == "w":
+            y -= self["size"][1] / 2
+        elif self["anchor"] == "n":
+            x -= self["size"][0] / 2
+        elif self["anchor"] == "s":
+            x -= self["size"][0] / 2
+            y -= self["size"][1]
+        return x, y
+
+    def build(self: dict):
+        if self["hover"]:
+            image = "hover_textureTk"
+        else:
+            image = "textureTk"
+        self["button"] = self["canvas"].create_image(self["x"], self["y"], image=self[image], anchor="nw")
+        # bind the mouse events
+        self["canvas"].tag_bind(self["button"], "<Enter>", lambda e: self["hover_on"](self))
+        self["canvas"].tag_bind(self["button"], "<Leave>", lambda e: self["hover_off"](self))
+        self["canvas"].tag_bind(self["button"], "<Button-1>", lambda e: self["click"](self))
+
+    self["hover_on"] = hover_on
+    self["hover_off"] = hover_off
+    self["click"] = click
+    self["get_anchor_position"] = get_anchor_position
+    self["build"] = build
+
+    self["texture"] = Image.open(self["icon"])
+    if not self["hover_icon"]:
+        self["hover_icon"] = self["icon"]
+    self["hover_texture"] = Image.open(self["hover_icon"])
+
+    if not size:
+        self["size"] = self["texture"].size
+    self["x"], self["y"] = self["get_anchor_position"](self, self["x"], self["y"])
+    self["textureTk"] = ImageTk.PhotoImage(self["texture"].resize(self["size"]))
+    self["hover_textureTk"] = ImageTk.PhotoImage(self["hover_texture"].resize(self["size"]))
+    self["build"](self)
+
+    return self
+
+
 # making the menu
 def Menu(root: tkinter.Tk):
     """Fait une fenetre Menu grâce à Tkinter."""
@@ -499,8 +582,6 @@ def Game(root: tkinter.Tk):
             frames.append((int(movement[0] * pourcentage * pixel_gap - done[0]),
                            int(movement[1] * pourcentage * pixel_gap - done[1])))
             done = int(movement[0] * pourcentage * pixel_gap), int(movement[1] * pourcentage * pixel_gap)
-        self["canvas"].tag_raise(self["tiles"][start[0]][start[1]])
-        self["canvas"].tag_raise(self["texts"][start[0]][start[1]])
         self["animate"](self, frames, 0, start, len(frames) - 1, fps)
 
     def animate(self: dict, frames: list[tuple[int, int]], frame: int, start: tuple[int, int], frames_length: int,
@@ -527,6 +608,8 @@ def Game(root: tkinter.Tk):
     self["update"] = update
     self["grid"]["start"](self["grid"])
 
+    self["animating"] = False
+
     # Color of the tiles.
     self["color"] = {2: "#eee4da", 4: "#ede0c8", 8: "#f2b179", 16: "#f59563", 32: "#f67c5f", 64: "#f65e3b",
                      128: "#edcf72",
@@ -549,10 +632,10 @@ def Game(root: tkinter.Tk):
         animation_duration = 100
         for movement in move_data["mouvement"]:
             self["animation"](self, movement["from"], movement["to"], animation_duration, fps=60,
-                                  function=lambda x: -(math.cos(math.pi * x) - 1) / 2)
+                              function=lambda x: -(math.cos(math.pi * x) - 1) / 2)
         for fusion in move_data["fusion"]:
             self["animation"](self, fusion["from"], fusion["to"], animation_duration, fps=60,
-                                                        function=lambda x: -(math.cos(math.pi * x) - 1) / 2)
+                              function=lambda x: -(math.cos(math.pi * x) - 1) / 2)
 
         # print(direction, self["grid"]["matrix"])
         # update(self)
