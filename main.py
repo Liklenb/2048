@@ -194,7 +194,7 @@ def Grid():
                            title="Charger une partie sauvegardée")
 
         # Si l'utilisateur annule, on arrête la fonction.
-        if file is None or "matrix":
+        if file is None:
             return
 
         # On charge les informations de la partie sauvegardée.
