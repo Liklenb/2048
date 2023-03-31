@@ -437,7 +437,7 @@ def Grid4D():
 
                     # Si la case précédente est égale à la case actuelle et qu'elle n'a pas déjà fusionné, on fusionne
                     # les deux cases.
-                    if (0 <= prev_y < 4 and 0 <= prev_z < 4) and self["matrix"][z][prev_y][prev_z] == \
+                    if (0 <= prev_y < 4 and 0 <= prev_z < 4) and self["matrix"][x][prev_y][prev_z] == \
                             self["matrix"][x][y][z] \
                             and (x, prev_y, prev_z) not in pos:
                         self["matrix"][x][prev_y][prev_z] *= 2
