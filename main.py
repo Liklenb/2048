@@ -1,24 +1,119 @@
 import tkinter.font
 
-# On importe randint et random du package random.
-from random import randint, random
-
-# On importe les fonctions de tkinter, json et datetime pour enregistrer une partie.
-from tkinter.filedialog import asksaveasfile, askopenfile
-import json
-from datetime import datetime
 import math
 from PIL import Image, ImageTk
 
+from random import randint, random
 
-def Grid():
+from tkinter.filedialog import asksaveasfile, askopenfile
+from datetime import datetime
+import json
+
+
+def load():
     """
-    Fonction regroupant toutes les fonctions invisibles à la grille de jeu.
+    Charge une partie sauvegardée.
+    :return bool: False si la partie sauvegardée n'est pas valide.
+    :return dict data: Dictionnaire contenant la grille de jeu et le type de jeu.
+    """
+
+    # On ouvre l'explorateur de fichier.
+    file = askopenfile(mode="r", defaultextension=".json", filetypes=[("JSON", "*.json")],
+                       title="Charger une partie sauvegardée")
+
+    # Si l'utilisateur annule, on arrête la fonction.
+    if file is None:
+        return False
+
+    # On charge les informations de la partie sauvegardée.
+    with open(file.name, "r") as f:
+        # Si le fichier n'est pas valide, on arrête la fonction.
+        try:
+            info = json.load(f)
+        except json.decoder.JSONDecodeError:
+            return False
+
+    # On vérifie que type et matrix sont présents.
+    if "type" not in info and "matrix" not in info:
+        return False
+
+    # On vérifie que la partie sauvegardée est valide.
+    if len(info["matrix"]) != 4:
+        return False
+
+    if info["type"] == "4D":
+
+        for x in range(4):
+            for y in range(2):
+
+                try:
+                    if len(info["matrix"][x][y]) != 2:
+                        return False
+                    for z in range(2):
+                        if info["matrix"][x][y][z] not in [0, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048]:
+                            return False
+                except IndexError:
+                    return False
+
+        data = {"type": "4D", "matrix": info["matrix"]}
+
+        return data
+
+    elif info["type"] == "simple":
+
+        for x in range(4):
+            if len(info["matrix"][x]) != 4:
+                return False
+            for y in range(4):
+                if info["matrix"][x][y] not in [0, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048]:
+                    return False
+
+        data = {"type": "simple", "matrix": info["matrix"]}
+
+        return data
+
+    else:
+        return False
+
+
+def save(matrix: list, matrix_type: str):
+    """
+    Sauvegarde la partie en cours.
+    :param list matrix: Liste contenant la grille de jeu.
+    :param str matrix_type: Type de jeu.
+    :return bool: False si l'utilisateur annule la sauvegarde.
+    """
+
+    # On crée un dictionnaire qui va nous permettre de stocker les informations de la partie.
+    data = {
+        "type": f"{matrix_type}",
+        "matrix": matrix
+    }
+
+    # On ouvre l'explorateur de fichier.
+    file = asksaveasfile(mode="w", defaultextension=".json", filetypes=[("JSON", "*.json")],
+                         initialfile=f"2048_{matrix_type}_grid_{datetime.now().strftime('%d-%m-%Y_%H-%M-%S')}",
+                         title="Sauvegarder la partie")
+
+    # Si l'utilisateur annule, on arrête la fonction.
+    if file is None:
+        return False
+
+    # On sauvegarde les informations de la partie.
+    with open(file.name, "w") as f:
+        json.dump(data, f)
+
+
+def SimpleGrid() -> dict:
+    """
+    Fonction regroupant toutes les fonctions invisibles à la grille de jeu simple.
+    :return dict self: Dictionnaire contenant la grille de jeu.
     """
 
     def start(self: dict):
         """
         Génère deux tuiles de valeur 2 ou 4 aléatoirement sur la grille.
+        :param dict self: Dictionnaire contenant la grille de jeu.
         """
 
         for i in range(2):
@@ -27,20 +122,23 @@ def Grid():
     def get_empty_tiles(self: dict) -> list:
         """
         Récupère les positions vides de la grille.
-        :return: pos
+        :param dict self: Dictionnaire contenant la grille de jeu.
+        :return list empty_tiles: Liste des positions vides.
         """
 
-        pos = []
+        empty_tiles = []
         for x in range(4):
             for y in range(4):
                 if self["matrix"][x][y] == 0:
-                    pos.append((x, y))
-        return pos
+                    empty_tiles.append((x, y))
+
+        return empty_tiles
 
     def generate_new_tile(self: dict, empty_tiles: list):
         """
         Génère une nouvelle tuile de valeur 2 ou 4 aléatoirement sur la grille.
-        :param empty_tiles:
+        :param dict self: Dictionnaire contenant la grille de jeu.
+        :param empty_tiles: Liste des positions vides.
         """
 
         if empty_tiles:
@@ -55,7 +153,8 @@ def Grid():
     def check_win(self: dict) -> bool:
         """
         Vérifie si la partie est gagnée.
-        :return: bool
+        :param dict self: Dictionnaire contenant la grille de jeu.
+        :return bool: True si la partie est gagnée, False sinon.
         """
 
         for row in self["matrix"]:
@@ -67,8 +166,9 @@ def Grid():
     def check_lose(self: dict, empty_tiles: list) -> bool:
         """
         Vérifie si on peut faire un mouvement dans la direction donnée.
-        :param empty_tiles:
-        :return: bool
+        :param dict self: Dictionnaire contenant la grille de jeu.
+        :param list empty_tiles: Liste des positions vides.
+        :return bool: True si la partie est perdue, False sinon.
         """
 
         if empty_tiles:
@@ -83,7 +183,6 @@ def Grid():
             y_start, y_end, y_step = config[direction]["y_start"], config[direction]["y_end"], config[direction][
                 "y_step"]
 
-            # oN parcourt la grille.
             for x in range(x_start, x_end, x_step):
                 for y in range(y_start, y_end, y_step):
 
@@ -97,8 +196,9 @@ def Grid():
     def move(self: dict, direction: str) -> dict:
         """
         Déplace les tuiles dans la direction donnée.
-        :param direction: str
-        :return: data
+        :param dict self: Dictionnaire contenant la grille de jeu.
+        :param str direction: Direction dans laquelle on veut déplacer les tuiles.
+        :return dict data: Dictionnaire contenant les informations sur le mouvement.
         """
 
         data = {
@@ -161,58 +261,31 @@ def Grid():
 
         return data
 
-    def save(self: dict):
-        """
-        Sauvegarde la partie en cours.
-        """
-
-        # On crée un dictionnaire qui va nous permettre de stocker les informations de la partie.
-        data = {
-            "matrix": self["matrix"]
-        }
-
-        # On ouvre l'explorateur de fichier.
-        file = asksaveasfile(mode="w", defaultextension=".json", filetypes=[("JSON", "*.json")],
-                             initialfile=f"2048_{datetime.now().strftime('%d-%m-%Y_%H-%M-%S')}",
-                             title="Sauvegarder la partie")
-
-        # Si l'utilisateur annule, on arrête la fonction.
-        if file is None:
-            return
-
-        # On sauvegarde les informations de la partie.
-        with open(file.name, "w") as f:
-            json.dump(data, f)
-
-    def load(self: dict):
-        """
-        Charge une partie sauvegardée.
-        """
-
-        # On ouvre l'explorateur de fichier.
-        file = askopenfile(mode="r", defaultextension=".json", filetypes=[("JSON", "*.json")],
-                           title="Charger une partie sauvegardée")
-
-        # Si l'utilisateur annule, on arrête la fonction.
-        if file is None:
-            return
-
-        # On charge les informations de la partie sauvegardée.
-        with open(file.name, "r") as f:
-            info = json.load(f)
-
-        # Si la partie sauvegardée n'est pas valide, on arrête la fonction.
-        if "matrix" not in info:
-            return
-
-        # On met à jour les informations de la partie.
-        self["matrix"] = info["matrix"]
-
     config = {
-        "up": {"dx": -1, "dy": 0, "x_start": 1, "x_end": 4, "x_step": 1, "y_start": 0, "y_end": 4, "y_step": 1},
-        "down": {"dx": 1, "dy": 0, "x_start": 2, "x_end": -1, "x_step": -1, "y_start": 0, "y_end": 4, "y_step": 1},
-        "left": {"dx": 0, "dy": -1, "x_start": 0, "x_end": 4, "x_step": 1, "y_start": 1, "y_end": 4, "y_step": 1},
-        "right": {"dx": 0, "dy": 1, "x_start": 0, "x_end": 4, "x_step": 1, "y_start": 2, "y_end": -1, "y_step": -1},
+
+        "up": {
+            "dx": -1, "dy": 0,
+            "x_start": 1, "x_end": 4, "x_step": 1,
+            "y_start": 0, "y_end": 4, "y_step": 1
+        },
+
+        "down": {
+            "dx": 1, "dy": 0,
+            "x_start": 2, "x_end": -1, "x_step": -1,
+            "y_start": 0, "y_end": 4, "y_step": 1
+        },
+
+        "left": {
+            "dx": 0, "dy": -1,
+            "x_start": 0, "x_end": 4, "x_step": 1,
+            "y_start": 1, "y_end": 4, "y_step": 1
+        },
+
+        "right": {
+            "dx": 0, "dy": 1,
+            "x_start": 0, "x_end": 4, "x_step": 1,
+            "y_start": 2, "y_end": -1, "y_step": -1
+        },
     }
 
     self = {
@@ -220,8 +293,208 @@ def Grid():
         "score": 0,
         "start": start,
         "move": move,
-        "save": save,
-        "load": load
+        "check_win": check_win,
+        "check_lose": check_lose,
+        "get_empty_tiles": get_empty_tiles
+    }
+
+    return self
+
+
+def Grid4D():
+    """
+    Fonction regroupant toutes les fonctions invisibles à la grille de jeu 4D.
+    :return dict self: Dictionnaire contenant la grille de jeu.
+    """
+
+    def start(self: dict):
+        """
+        Génère deux tuiles de valeur 2 ou 4 aléatoirement sur la grille.
+        :param dict self: Dictionnaire contenant la grille de jeu.
+        """
+
+        for i in range(2):
+            generate_new_tile(self, get_empty_tiles(self))
+
+    def get_empty_tiles(self: dict) -> list:
+        """
+        Récupère les positions vides de la grille.
+        :param dict self: Dictionnaire contenant la grille de jeu.
+        :return list empty_tiles: Liste des positions vides de la grille.
+        """
+
+        empty_tiles = []
+
+        for x in range(4):
+            for y in range(2):
+                for z in range(2):
+                    if self["matrix"][x][y][z] == 0:
+                        empty_tiles.append((x, y, z))
+
+        return empty_tiles
+
+    def generate_new_tile(self: dict, empty_tiles: list):
+        """
+        Génère une nouvelle tuile de valeur 2 ou 4 aléatoirement sur la grille.
+        :param dict self: Dictionnaire contenant la grille de jeu.
+        :param list empty_tiles: Liste des positions vides de la grille.
+        """
+
+        if empty_tiles:
+            x, y, z = empty_tiles[randint(0, len(empty_tiles) - 1)]
+            if random() < 0.9:
+                self["matrix"][x][y][z] = 2
+            else:
+                self["matrix"][x][y][z] = 4
+
+            self["score"] += self["matrix"][x][y][z]
+
+    def check_win(self: dict) -> bool:
+        """
+        Vérifie si la partie est gagnée.
+        :param dict self: Dictionnaire contenant la grille de jeu.
+        :return bool: True si la partie est gagnée, False sinon.
+        """
+
+        for x in self["matrix"]:
+            for y in x:
+                for elem in y:
+                    if elem == 2048:
+                        return True
+        return False
+
+    def check_lose(self: dict, empty_tiles: list) -> bool:
+        """
+        Vérifie si on peut faire un mouvement dans la direction donnée.
+        :param dict self: Dictionnaire contenant la grille de jeu.
+        :param list empty_tiles: Liste des positions vides de la grille.
+        :return bool: True si la partie est perdue, False sinon.
+        """
+
+        if empty_tiles:
+            return False
+
+        for direction in config:
+
+            # On récupère les coordonnées de départ et d'arrivée.
+            dy, dz = config[direction]["dy"], config[direction]["dz"]
+            y_start, y_end, y_step = config[direction]["y_start"], config[direction]["y_end"], config[direction][
+                "y_step"]
+            z_start, z_end, z_step = config[direction]["z_start"], config[direction]["z_end"], config[direction][
+                "z_step"]
+
+            for x in range(4):
+                for y in range(y_start, y_end, y_step):
+                    for z in range(z_start, z_end, z_step):
+                        if self["matrix"][x][y][z] == self["matrix"][x][y + dy][z + dz]:
+                            return False
+        return True
+
+    def move(self: dict, direction: str) -> dict:
+        """
+        Déplace les tuiles dans la direction donnée.
+        :param dict self: Dictionnaire contenant la grille de jeu.
+        :param str direction: Direction dans laquelle on veut déplacer les tuiles.
+        :return dict data: Dictionnaire contenant les informations sur le mouvement.
+        """
+
+        data = {
+            "mouvement": [],
+            "fusion": [],
+        }
+
+        empty_tiles = get_empty_tiles(self)
+
+        if check_win(self):
+            return data
+        elif check_lose(self, empty_tiles):
+            return data
+
+        pos = []
+
+        # On récupère les informations de la direction donnée.
+        info = config[direction]
+        # On récupère les coordonnées de départ et d'arrivée.
+        dy, dz = info["dy"], info["dz"]
+        y_start, y_end, y_step = info["y_start"], info["y_end"], info["y_step"]
+        z_start, z_end, z_step = info["z_start"], info["z_end"], info["z_step"]
+
+        # On parcourt la grille.
+        for x in range(4):
+            for y in range(y_start, y_end, y_step):
+                for z in range(z_start, z_end, z_step):
+
+                    if self["matrix"][x][y][z] == 0:
+                        continue
+
+                    # On définit les variables qui vont nous permettre de parcourir la matrice dans la direction donnée.
+                    prev_y, prev_z = y + dy, z + dz
+
+                    # Tant que la case précédente est vide, on continue de parcourir la matrice dans la direction
+                    # donnée.
+                    while (0 <= prev_y < 4 and 0 <= prev_z < 4) and self["matrix"][x][prev_y][prev_z] == 0:
+                        prev_y, prev_z = prev_y + dy, prev_z + dz
+
+                    # Si la case précédente est égale à la case actuelle et qu'elle n'a pas déjà fusionné, on fusionne
+                    # les deux cases.
+                    if (0 <= prev_y < 4 and 0 <= prev_z < 4) and self["matrix"][z][prev_y][prev_z] == \
+                            self["matrix"][x][y][z] \
+                            and (x, prev_y, prev_z) not in pos:
+                        self["matrix"][x][prev_y][prev_z] *= 2
+                        self["matrix"][x][y][z] = 0
+
+                        # On stocke les coordonnées de la case qui a fusionné.
+                        data["fusion"].append({"from": (x, y, z), "to": (x, prev_y, prev_z)})
+                        pos.append((x, prev_y, prev_z))
+
+                    # Sinon, on déplace la case actuelle vers la première case vide au-dessus.
+                    else:
+                        if (prev_y - dy, prev_z - dz) != (y, x):
+                            self["matrix"][x][prev_y - dy][prev_z - dz] = self["matrix"][x][y][z]
+                            self["matrix"][x][y][z] = 0
+                            data["mouvement"].append({"from": (x, y, z), "to": (x, prev_y - dy, prev_z - dz)})
+
+        # Génère une nouvelle tuile si une fusion ou un mouvement a eu lieu
+        if data["mouvement"] or data["fusion"]:
+            generate_new_tile(self, get_empty_tiles(self))
+
+        return data
+
+    config = {
+
+        "up": {
+            "dy": -1, "dz": 0,
+            "y_start": 1, "y_end": 2, "y_step": 1,
+            "z_start": 0, "z_end": 2, "z_step": 1,
+        },
+
+        "down": {
+            "dy": 1, "dz": 0,
+            "y_start": 0, "y_end": -1, "y_step": -1,
+            "z_start": 0, "z_end": 2, "z_step": 1,
+        },
+
+        "left": {
+            "dy": 0, "dz": -1,
+            "y_start": 0, "y_end": 2, "y_step": 1,
+            "z_start": 1, "z_end": 2, "z_step": 1,
+        },
+
+        "right": {
+            "dy": 0, "dz": 1,
+            "y_start": 0, "y_end": 2, "y_step": 1,
+            "z_start": 0, "z_end": -1, "z_step": -1,
+        },
+    }
+
+    self = {
+        "matrix": [[[0, 0], [0, 0]], [[0, 0], [0, 0]], [[0, 0], [0, 0]], [[0, 0], [0, 0]]],
+        "score": 0,
+        "start": start,
+        "move": move,
+        "check_win": check_win,
+        "check_lose": check_lose,
+        "get_empty_tiles": get_empty_tiles
     }
 
     return self
@@ -460,7 +733,7 @@ def Menu(root: tkinter.Tk):
     self["frame"].grid(row=0, column=0)
     self["canvas"] = tkinter.Canvas(self["frame"], width=root.winfo_width(), height=root.winfo_height(), bg="#a39489")
     self["canvas"].pack()
-    self["grid"] = Grid()
+    self["grid"] = SimpleGrid()
     self["canvas"].create_text(root.winfo_width() // 2, 20, anchor="n", text="2048", font='Helvetica 80 bold',
                                fill="#776e65")
     point = int(root.winfo_width() // 2), int(root.winfo_height() // 2.35)
@@ -602,7 +875,7 @@ def Game(root: tkinter.Tk):
 
     # make tiles move with Grid()
     # get the move() function from Grid()
-    self["grid"] = Grid()
+    self["grid"] = SimpleGrid()
     self["animation"] = animation
     self["animate"] = animate
     self["update"] = update
