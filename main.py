@@ -261,6 +261,83 @@ def SimpleGrid() -> dict:
 
         return data
 
+    def heuristic(self: dict, data: dict) -> int:
+        """
+        Calcule la valeur heuristique de la direction donnée. Plus la valeur heuristique est élevée,
+        plus la direction est bonne. Le concept du poids des cases est tiré de Google, mais le code est entièrement de
+        moi.
+        :param dict self: Dictionnaire contenant la grille de jeu.
+        :param dict data: Dictionnaire contenant les informations de la direction donnée.
+        :return int value: Valeur heuristique de la direction donnée.
+        """
+
+        # On définit les poids des cases.
+        weight = [[2 ** 15, 2 ** 14, 2 ** 10, 2 ** 6],
+                  [2 ** 14, 2 ** 10, 2 ** 6, 2 ** 4],
+                  [2 ** 10, 2 ** 6, 2 ** 4, 2 ** 2],
+                  [2 ** 6, 2 ** 4, 2 ** 2, 2 ** 0]]
+
+        # On initialise la valeur qui va servir de score.
+        value = 0
+
+        # On ajoute la valeur de chaque case à la valeur heuristique.
+        for x in range(4):
+            for y in range(4):
+                value += self["matrix"][x][y] * weight[x][y]
+
+        # On augmente value si la case est vide.
+        for x in range(4):
+            for y in range(4):
+                if self["matrix"][x][y] == 0:
+                    value += 2 ** 30
+
+        # On augmente value si une fusion a eu lieu.
+        for i in range(len(data["fusion"])):
+            value += 2 ** 30
+
+        # On augmente value si deux cases adjacentes ont la même valeur.
+        for x in range(4):
+            for y in range(4):
+                if x > 0 and self["matrix"][x][y] == self["matrix"][x - 1][y]:
+                    value += 2 ** 15
+                if x < 3 and self["matrix"][x][y] == self["matrix"][x + 1][y]:
+                    value += 2 ** 15
+                if y > 0 and self["matrix"][x][y] == self["matrix"][x][y - 1]:
+                    value += 2 ** 15
+                if y < 3 and self["matrix"][x][y] == self["matrix"][x][y + 1]:
+                    value += 2 ** 15
+
+        return value
+
+    def ai(self: dict):
+        """
+        Fonction qui permet à l'IA de jouer.
+        :param dict self: Dictionnaire contenant la grille de jeu.
+        """
+
+        # On détermine la meilleure direction à prendre.
+        best_move = {"up": 0, "down": 0, "left": 0, "right": 0}
+
+        # On sauvegarde la matrice actuelle.
+        save_matrix = [row[:] for row in self["matrix"]]
+
+        # On teste toutes les directions.
+        for direction in ["up", "down", "left", "right"]:
+
+            # On déplace la tuile dans la direction donnée et on récupère les données.
+            data = move(self, direction)
+
+            # Si la matrice a changé, on calcule la valeur heuristique de la direction donnée.
+            if self["matrix"] != save_matrix:
+                # On stocke la valeur heuristique de la direction donnée.
+                best_move[direction] = heuristic(self, data)
+
+                # On remet la matrice à son état initial.
+                self["matrix"] = [row[:] for row in save_matrix]
+
+        # On déplace la tuile dans la direction qui a la meilleure valeur heuristique.
+        move(self, max(best_move, key=best_move.get))
+
     config = {
 
         "up": {
@@ -295,7 +372,8 @@ def SimpleGrid() -> dict:
         "move": move,
         "check_win": check_win,
         "check_lose": check_lose,
-        "get_empty_tiles": get_empty_tiles
+        "get_empty_tiles": get_empty_tiles,
+        "ai": ai
     }
 
     return self
@@ -432,12 +510,12 @@ def Grid4D():
 
                     # Tant que la case précédente est vide, on continue de parcourir la matrice dans la direction
                     # donnée.
-                    while (0 <= prev_y < 4 and 0 <= prev_z < 4) and self["matrix"][x][prev_y][prev_z] == 0:
+                    while (0 <= prev_y < 2 and 0 <= prev_z < 2) and self["matrix"][x][prev_y][prev_z] == 0:
                         prev_y, prev_z = prev_y + dy, prev_z + dz
 
                     # Si la case précédente est égale à la case actuelle et qu'elle n'a pas déjà fusionné, on fusionne
                     # les deux cases.
-                    if (0 <= prev_y < 4 and 0 <= prev_z < 4) and self["matrix"][x][prev_y][prev_z] == \
+                    if (0 <= prev_y < 2 and 0 <= prev_z < 2) and self["matrix"][x][prev_y][prev_z] == \
                             self["matrix"][x][y][z] \
                             and (x, prev_y, prev_z) not in pos:
                         self["matrix"][x][prev_y][prev_z] *= 2
@@ -449,7 +527,7 @@ def Grid4D():
 
                     # Sinon, on déplace la case actuelle vers la première case vide au-dessus.
                     else:
-                        if (prev_y - dy, prev_z - dz) != (y, x):
+                        if (prev_y - dy, prev_z - dz) != (y, z):
                             self["matrix"][x][prev_y - dy][prev_z - dz] = self["matrix"][x][y][z]
                             self["matrix"][x][y][z] = 0
                             data["mouvement"].append({"from": (x, y, z), "to": (x, prev_y - dy, prev_z - dz)})
