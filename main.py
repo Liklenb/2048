@@ -812,30 +812,41 @@ def Menu(root: tkinter.Tk):
     self["canvas"] = tkinter.Canvas(self["frame"], width=root.winfo_width(), height=root.winfo_height(), bg="#a39489")
     self["canvas"].pack()
     self["grid"] = SimpleGrid()
-    self["canvas"].create_text(root.winfo_width() // 2, 20, anchor="n", text="2048", font='Helvetica 80 bold',
+    self["canvas"].create_text(root.winfo_width() // 2, 20, anchor="n", text="2048", font='Roboto 300 bold',
                                fill="#776e65")
     point = int(root.winfo_width() // 2), int(root.winfo_height() // 2.35)
-    BetterButton(self["canvas"], point[0], point[1], "Jouer", anchor="n",
-                 size=(200, 50), command=lambda: Game(root), text_color=(255, 255, 255), color=(119, 110, 101),
-                 hover_color=(150, 140, 130))
-    BetterButton(self["canvas"], point[0], point[1] + 60, "2048 4D",
-                 size=(200, 50), 
-                 anchor="n", command =lambda: Game4D(root),
-                 text_color=(255, 255, 255), color=(119, 110, 101), hover_color=(150, 140, 130))
-    BetterButton(self["canvas"], point[0], point[1] + 120, "Quitter",
+    BetterButton(self["canvas"], point[0], point[1], "Classique", anchor="n",
+                 size=(400, 80), command=lambda: Game(root, False, ), text_color=(255, 255, 255), color=(119, 110, 101),
+                 hover_color=(150, 140, 130), font=tkinter.font.Font(size=50), border_radius=90)
+    BetterButton(self["canvas"], point[0], point[1] + 90, "4D",
+                 size=(400, 80), 
+                 anchor="n", command =lambda: Game4D(root, False),
+                 text_color=(255, 255, 255), color=(119, 110, 101), hover_color=(150, 140, 130),
+                 font=tkinter.font.Font(size=50), border_radius=90)
+    BetterButton(self["canvas"], point[0], point[1] + 270, "Quitter",
                  anchor="n",
-                 size=(200, 50), command=root.destroy, text_color=(255, 255, 255), color=(119, 110, 101),
-                 hover_color=(150, 140, 130))
+                 size=(400, 80), command=root.destroy, text_color=(255, 255, 255), color=(119, 110, 101),
+                 hover_color=(150, 140, 130), font=tkinter.font.Font(size=50), border_radius=90)
     # Button to load the game
     BetterButton(self["canvas"], point[0], point[1] + 180, "Charger",
                  anchor="n",
-                 size=(200, 50), command=lambda: self["grid"]["load"](self["grid"]), text_color=(255, 255, 255),
+                 size=(400, 80), command=lambda: verify_load(root), text_color=(255, 255, 255),
                  color=(119, 110, 101),
-                 hover_color=(150, 140, 130))
+                 hover_color=(150, 140, 130), font=tkinter.font.Font(size=50), border_radius=90)
+
+def verify_load(root: tkinter.Tk):
+    data = load()
+    if data ==  False:
+        pass
+    elif data["type"] == "4D":
+        Game4D(root, True, data)
+    elif data["type"] == "simple":
+        Game(root, True, data)
+        
 
 
 # making the 2048 normal mode window 
-def Game(root: tkinter.Tk):
+def Game(root: tkinter.Tk, isload:bool, data=None):
     """Fait une fentre de jeu grâce à Tkinter."""
     self = {
         "frame": tkinter.Frame(root),
@@ -854,9 +865,23 @@ def Game(root: tkinter.Tk):
                  hover_color=(150, 140, 130))
     # Button to save the game
     BetterButton(self["canvas"], point[0], point[1] + 120, "Sauvegarder",
-                 command=lambda: self["grid"]["save"](self["grid"]),
+                 command=lambda: save(self["grid"]["matrix"], "simple"),
                  size=(200, 50), anchor="n", text_color=(255, 255, 255), color=(119, 110, 101),
                  hover_color=(150, 140, 130))
+
+    #button for ai
+    BetterButton(self["canvas"], point[0], point[1] + 180, "AI",
+                anchor="n",
+                size=(200, 50), command=lambda:ai_update(), text_color=(255, 255, 255),
+                 color=(119, 110, 101),
+                 hover_color=(150, 140, 130))
+
+    def ai_update():
+        while not self["grid"]["check_lose"](self["grid"], self["grid"]["get_empty_tiles"](self["grid"])):
+            if self["grid"]["check_win"](self["grid"]):
+                break
+            self["grid"]["ai"](self["grid"])
+            update(self)
 
     # making a background for the game that is centered
     center = root.winfo_width() // 2
@@ -957,7 +982,12 @@ def Game(root: tkinter.Tk):
     self["animation"] = animation
     self["animate"] = animate
     self["update"] = update
-    self["grid"]["start"](self["grid"])
+
+    if isload == True:
+        self["grid"]["matrix"] = data["matrix"]
+        print(data["matrix"])
+    else:
+        self["grid"]["start"](self["grid"])
 
     self["animating"] = False
 
@@ -1014,8 +1044,16 @@ def Game(root: tkinter.Tk):
     root.bind("<KeyPress-Right>", lambda event: action(self, "down"))
     print("jeu : ", self["grid"]["matrix"])
 
+    #check if the game was loaded from a save
+    if self["grid"]["matrix"] == [[0 for _ in range(4)] for _ in range(4)]:
+        self["grid"]["add_tile"](self["grid"])
+        self["grid"]["add_tile"](self["grid"])
+        update(self)
+    print("jeu : ", self["grid"]["matrix"])
+
+
 #making the 2048 4D window
-def Game4D(root: tkinter.Tk):
+def Game4D(root: tkinter.Tk, isload: bool, data=None):
     """Fait une fentre de jeu grâce à Tkinter."""
     self = {
         "frame": tkinter.Frame(root),
@@ -1045,7 +1083,7 @@ def Game4D(root: tkinter.Tk):
                  hover_color=(150, 140, 130))
     # Button to save the game
     BetterButton(self["canvas"], point[0], point[1] + 120, "Sauvegarder",
-                 command=lambda: self["grid"]["save"](self["grid"]),
+                 command=lambda: save(self["grid"]["matrix"], "4D"),
                  size=(200, 50), anchor="n", text_color=(255, 255, 255), color=(119, 110, 101),
                  hover_color=(150, 140, 130))  
         # create empty tiles for the grid
@@ -1054,7 +1092,7 @@ def Game4D(root: tkinter.Tk):
     # create the grid
     spacex = 10
     spacey = 0
-    # making a 2048 4D grid while adding space in between evry block of 4 tiles
+    # making a 2048 4D grid while adding space in between every block of 4 tiles
     for i in range(4):
         if i == 2:
             spacey += 15
@@ -1073,6 +1111,11 @@ def Game4D(root: tkinter.Tk):
                             fill="#cdc1b4", outline="#cdc1b4", radius=10)
     # show the tiles on the grid
     self["grid"] = Grid4D()
+    if isload == True:
+        self["grid"]["matrix"] = data["matrix"]
+        print(data["matrix"])
+    else:
+        self["grid"]["start"](self["grid"])
     self["grid"]["start"](self["grid"])
 
     # Color of the tiles. Same as the normal game.
@@ -1085,40 +1128,61 @@ def Game4D(root: tkinter.Tk):
 
     # update the tiles with the right color and text when the matrix change
     # update the tiles with the new matrix
-    def update(self):
-        """Met à jour les tuiles avec la nouvelle matrice en supprimant l'ancienne."""
-        for i in range(4):
-            for j in range(2):
-                for k in range(2):
-                    self["canvas"].delete(self["tiles"][i][j][k])
-                    self["canvas"].delete(self["texts"][i][j][k])
-                    if self["grid"]["matrix"][i][j][k] != 0:
-                        self["tiles"][i][j][k] = round_rectangle(self["canvas"],
-                                                          int(center - (
-                                                                  1.5 * self["padding"] + 2 * self["size"]) + i * (
-                                                                      self["size"] + self["padding"])),
-                                                          height + j * (self["size"] + self["padding"]) + self[
-                                                              "padding"],
-                                                          int(center - (
-                                                                  1.5 * self["padding"] + 2 * self["size"]) + i * (
-                                                                      self["size"] + self["padding"]) + self["size"]),
-                                                          height + j * (self["size"] + self["padding"]) + self["size"] +
-                                                          self["padding"],
-                                                          fill=self["color"][self["grid"]["matrix"][i][j][k]],
-                                                          outline=self["color"][self["grid"]["matrix"][i][j][k]],
-                                                          radius=10)
-                        self["texts"][i][j][k] = self["canvas"].create_text(
-                        int(center - (1.5 * self["padding"] + 2 * self["size"]) + i * (self["size"] + self["padding"]) +
-                            self["size"] // 2),
-                        height + j * (self["size"] + self["padding"]) + self["padding"] + self["size"] // 2,
-                        text=self["grid"]["matrix"][i][j][k], font='Helvetica 40 bold',
-                        fill="#776e65")
+    # def update(self):
+    #     """Met à jour les tuiles avec la nouvelle matrice en supprimant l'ancienne."""
+    #     for i in range(4):
+    #         for j in range(2):
+    #             for k in range(2):
+    #                 if self["tiles"][i][j][k] is not None:
+    #                     self["canvas"].delete(self["tiles"][i][j][k])
+    #                     self["canvas"].delete(self["texts"][i][j][k])
+    #                 if self["grid"]["matrix"][i][j][k] != 0:
+    #                     self["tiles"][i][j][k] = round_rectangle(self["canvas"],
+    #                         #x1
+    #                         x1=int(center - (3 * self["padding"] + 2 * self["size"]) + i * (
+    #                                 self["size"] + self["padding"]) + 10),
+    #                         #y1
+    #                         y1=height + j * (self["size"] + self["padding"]) + self["padding"] + 10 + k * (
+    #                                 self["size"] + self["padding"]) + 10,
+    #                         #x2
+    #                         x2=int(center - (3 * self["padding"] + 2 * self["size"]) + i * (
+    #                                 self["size"] + self["padding"]) + self["size"] + 10),
+    #                         #y2
+    #                         y2=height + j * (self["size"] + self["padding"]) + self["size"] +
+    #                         self["padding"] + 10 + k * (self["size"] + self["padding"]) + 10,
+
+    #                         fill=self["color"][self["grid"]["matrix"][i][j][k]], outline=self["color"][self["grid"]["matrix"][i][j][k]],
+    #                         radius=10)
+    #                     self["texts"][i][j][k] = self["canvas"].create_text(
+    #                         int(center - (2.5 * self["padding"] + 2 * self["size"]) + i * (
+    #                                 self["size"] + self["padding"]) + self["size"] // 2 + 10),
+    #                         height + j * (self["size"] + self["padding"]) + self["padding"] + self["size"] // 2 + 10 + k * (
+    #                                 self["size"] + self["padding"]) + 10,
+    #                         text=str(self["grid"]["matrix"][i][j][k]), font='Helvetica 30 bold', fill="#776e65")
+
 
     # update the tiles when the matrix change
-    update(self)
+    # update(self)
 
+    self["score"] = self["canvas"].create_text(root.winfo_width() // 2, root.winfo_height() // 4.5, anchor="n",
+                                               text="Score : " + str(self["grid"]["score"]), font='Helvetica 30 bold',
+                                               fill="#776e65")
+
+    def action(self, direction):
+        """Fonction qui fait bouger les tuiles et qui met à jour le score."""
+        # move the tiles
+        self["grid"]["move"](self["grid"], direction)
+        # update the tiles
+        #update(self)
+        # update the score
+        #self["score"]["text"] = "Score : " + str(self["grid"]["score"])
+
+    # bind the keys to the grid
+    root.bind("<KeyPress-Up>", lambda event: [action(self, "up"), print("jeu : ", self["grid"]["matrix"])])
+    root.bind("<KeyPress-Down>", lambda event: [action(self, "down"), print("jeu : ", self["grid"]["matrix"])])
+    root.bind("<KeyPress-Left>", lambda event: [action(self, "left"), print("jeu : ", self["grid"]["matrix"])])
+    root.bind("<KeyPress-Right>", lambda event: [action(self, "right"), print("jeu : ", self["grid"]["matrix"])])
     print("jeu : ", self["grid"]["matrix"])
-
 
 def main():
     # create the root
