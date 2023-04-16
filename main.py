@@ -1,3 +1,4 @@
+import time
 import tkinter.font
 
 import math
@@ -819,8 +820,8 @@ def Menu(root: tkinter.Tk):
                  size=(400, 80), command=lambda: Game(root, False, ), text_color=(255, 255, 255), color=(119, 110, 101),
                  hover_color=(150, 140, 130), font=tkinter.font.Font(size=50), border_radius=90)
     BetterButton(self["canvas"], point[0], point[1] + 90, "4D",
-                 size=(400, 80), 
-                 anchor="n", command =lambda: Game4D(root, False),
+                 size=(400, 80),
+                 anchor="n", command=lambda: Game4D(root, False),
                  text_color=(255, 255, 255), color=(119, 110, 101), hover_color=(150, 140, 130),
                  font=tkinter.font.Font(size=50), border_radius=90)
     BetterButton(self["canvas"], point[0], point[1] + 270, "Quitter",
@@ -834,19 +835,19 @@ def Menu(root: tkinter.Tk):
                  color=(119, 110, 101),
                  hover_color=(150, 140, 130), font=tkinter.font.Font(size=50), border_radius=90)
 
+
 def verify_load(root: tkinter.Tk):
     data = load()
-    if data ==  False:
+    if data == False:
         pass
     elif data["type"] == "4D":
         Game4D(root, True, data)
     elif data["type"] == "simple":
         Game(root, True, data)
-        
 
 
 # making the 2048 normal mode window 
-def Game(root: tkinter.Tk, isload:bool, data=None):
+def Game(root: tkinter.Tk, isload: bool, data=None):
     """Fait une fentre de jeu grâce à Tkinter."""
     self = {
         "frame": tkinter.Frame(root),
@@ -869,10 +870,10 @@ def Game(root: tkinter.Tk, isload:bool, data=None):
                  size=(200, 50), anchor="n", text_color=(255, 255, 255), color=(119, 110, 101),
                  hover_color=(150, 140, 130))
 
-    #button for ai
+    # button for ai
     BetterButton(self["canvas"], point[0], point[1] + 180, "AI",
-                anchor="n",
-                size=(200, 50), command=lambda:ai_update(), text_color=(255, 255, 255),
+                 anchor="n",
+                 size=(200, 50), command=lambda: ai_update(), text_color=(255, 255, 255),
                  color=(119, 110, 101),
                  hover_color=(150, 140, 130))
 
@@ -887,10 +888,10 @@ def Game(root: tkinter.Tk, isload:bool, data=None):
     center = root.winfo_width() // 2
     self["size"] = root.winfo_height() // 7
     self["padding"] = 15
-    height = int(root.winfo_height() // 3.5)
-    round_rectangle(self["canvas"], int(center - (2.5 * self["padding"] + 2 * self["size"])), height,
+    self["height"] = int(root.winfo_height() // 3.5)
+    round_rectangle(self["canvas"], int(center - (2.5 * self["padding"] + 2 * self["size"])), self["height"],
                     int(center + (2.5 * self["padding"] + 2 * self["size"])),
-                    height + (4 * self["size"] + 5 * self["padding"]),
+                    self["height"] + (4 * self["size"] + 5 * self["padding"]),
                     radius=10, fill="#bbada0")
 
     # create empty tiles for the grid
@@ -905,12 +906,12 @@ def Game(root: tkinter.Tk, isload:bool, data=None):
                             int(center - (
                                     1.5 * self["padding"] + 2 * self["size"]) + i * (
                                         self["size"] + self["padding"])),
-                            height + j * (self["size"] + self["padding"]) + self[
+                            self["height"] + j * (self["size"] + self["padding"]) + self[
                                 "padding"],
                             int(center - (
                                     1.5 * self["padding"] + 2 * self["size"]) + i * (
                                         self["size"] + self["padding"]) + self["size"]),
-                            height + j * (self["size"] + self["padding"]) + self["size"] +
+                            self["height"] + j * (self["size"] + self["padding"]) + self["size"] +
                             self["padding"],
                             fill="#cdc1b4", outline="#cdc1b4", radius=10)
 
@@ -928,12 +929,12 @@ def Game(root: tkinter.Tk, isload:bool, data=None):
                                                           int(center - (
                                                                   1.5 * self["padding"] + 2 * self["size"]) + i * (
                                                                       self["size"] + self["padding"])),
-                                                          height + j * (self["size"] + self["padding"]) + self[
+                                                          self["height"] + j * (self["size"] + self["padding"]) + self[
                                                               "padding"],
                                                           int(center - (
                                                                   1.5 * self["padding"] + 2 * self["size"]) + i * (
                                                                       self["size"] + self["padding"]) + self["size"]),
-                                                          height + j * (self["size"] + self["padding"]) + self["size"] +
+                                                          self["height"] + j * (self["size"] + self["padding"]) + self["size"] +
                                                           self["padding"],
                                                           fill=self["color"][self["grid"]["matrix"][i][j]],
                                                           outline=self["color"][self["grid"]["matrix"][i][j]],
@@ -941,9 +942,32 @@ def Game(root: tkinter.Tk, isload:bool, data=None):
                     self["texts"][i][j] = self["canvas"].create_text(
                         int(center - (1.5 * self["padding"] + 2 * self["size"]) + i * (self["size"] + self["padding"]) +
                             self["size"] // 2),
-                        height + j * (self["size"] + self["padding"]) + self["padding"] + self["size"] // 2,
+                        self["height"] + j * (self["size"] + self["padding"]) + self["padding"] + self["size"] // 2,
                         text=self["grid"]["matrix"][i][j], font='Helvetica 40 bold',
                         fill="#776e65")
+
+        # if the player lose we show a black background with a text
+        if self["grid"]["check_lose"](self["grid"], self["grid"]["get_empty_tiles"](self["grid"])):
+            # let's fade the grid with a pil image
+            self["lose_fade"] = self["canvas"].create_image(center, self["height"], image=self["fade_frames"][0], anchor="n")
+            self["canvas"].after(1, self["fade"], 1)
+            # creating the text
+            self["canvas"].create_text(center, self["height"] + self["size"] * 2 + self["padding"] * 3,
+                                       text="vous avez perdu !", font='Helvetica 40 bold',
+                                       fill="white")
+
+    def fade(current_opacity: int):
+        self["canvas"].itemconfig(self["lose_fade"], image=self["fade_frames"][current_opacity])
+        if current_opacity < len(self["fade_frames"]) - 1:
+            self["canvas"].after(1, self["fade"], current_opacity + 1)
+
+    # generating images for the fade
+    image = Image.new("RGBA", (self["size"] * 4 + self["padding"] * 5, self["size"] * 4 + self["padding"] * 5),
+                      (0, 0, 0, 0))
+    self["fade_frames"] = []
+    for i in range(0, 200, 10):
+        image.putalpha(i)
+        self["fade_frames"].append(ImageTk.PhotoImage(image))
 
     def animation(self: dict, start: tuple[int, int], end: tuple[int, int], duration: int, function=lambda x: x,
                   fps=60):
@@ -952,29 +976,30 @@ def Game(root: tkinter.Tk, isload:bool, data=None):
         movement = (end[0] - start[0], end[1] - start[1])
         pixel_gap = self["size"] + self["padding"]
         frames = []
-        done = (0, 0)
         for i in range(frame_count):
             pourcentage = function(i / frame_count)
-            frames.append((int(movement[0] * pourcentage * pixel_gap - done[0]),
-                           int(movement[1] * pourcentage * pixel_gap - done[1])))
-            done = int(movement[0] * pourcentage * pixel_gap), int(movement[1] * pourcentage * pixel_gap)
-        self["animate"](self, frames, 0, start, len(frames) - 1, fps)
+            frames.append((int(movement[0] * pourcentage * pixel_gap),
+                           int(movement[1] * pourcentage * pixel_gap)))
+        begin = time.time()
+        self["animate"](self, frames, start, self["canvas"].coords(self["tiles"][start[0]][start[1]]), self["canvas"].coords(self["texts"][start[0]][start[1]]), len(frames) - 1, duration, begin, fps)
 
-    def animate(self: dict, frames: list[tuple[int, int]], frame: int, start: tuple[int, int], frames_length: int,
-                fps=60):
+    def animate(self: dict, frames: list[tuple[int, int]], start: tuple[int, int], start_coords: tuple[int, int], text_start_coords: tuple[int, int], frames_length: int, duration: int,
+                begin: float, fps=60):
         """Anime les tuiles."""
-        if frame < frames_length:
+        if (time.time() - begin) * 1000 < duration:
             self["canvas"].after(1000 // fps,
-                                 lambda: self["animate"](self, frames, frame + 1, start, frames_length, fps))
-        self["canvas"].move(self["tiles"][start[0]][start[1]],
-                            frames[frame][0],
-                            frames[frame][1], )
-        self["canvas"].move(self["texts"][start[0]][start[1]],
-                            frames[frame][0],
-                            frames[frame][1])
-
-        if frame == frames_length:
+                                 lambda: self["animate"](self, frames, start, start_coords, text_start_coords, frames_length, duration, begin, fps))
+        else:
             self["update"](self)
+            self["guard_rail"] = False
+            return
+        frame = int(((time.time() - begin) * 1000) / duration * frames_length)
+        self["canvas"].moveto(self["tiles"][start[0]][start[1]],
+                              frames[frame][0] + start_coords[0] - 12,
+                              frames[frame][1] + start_coords[1], )
+        self["canvas"].coords(self["texts"][start[0]][start[1]],
+                              frames[frame][0] + text_start_coords[0],
+                              frames[frame][1] + text_start_coords[1])
 
     # make tiles move with Grid()
     # get the move() function from Grid()
@@ -982,6 +1007,8 @@ def Game(root: tkinter.Tk, isload:bool, data=None):
     self["animation"] = animation
     self["animate"] = animate
     self["update"] = update
+    self["fade"] = fade
+    self["guard_rail"] = False
 
     if isload == True:
         self["grid"]["matrix"] = data["matrix"]
@@ -1009,13 +1036,16 @@ def Game(root: tkinter.Tk, isload:bool, data=None):
 
     def action(self, direction):
         """Fonction qui fait bouger les tuiles et qui met à jour le score."""
+        if self["guard_rail"]:
+            return
+        self["guard_rail"] = True
+        animation_duration = 200
         move_data = self["grid"]["move"](self["grid"], direction)
-        animation_duration = 100
         for movement in move_data["mouvement"]:
-            self["animation"](self, movement["from"], movement["to"], animation_duration, fps=60,
+            self["animation"](self, movement["from"], movement["to"], animation_duration, fps=144,
                               function=lambda x: -(math.cos(math.pi * x) - 1) / 2)
         for fusion in move_data["fusion"]:
-            self["animation"](self, fusion["from"], fusion["to"], animation_duration, fps=60,
+            self["animation"](self, fusion["from"], fusion["to"], animation_duration, fps=144,
                               function=lambda x: -(math.cos(math.pi * x) - 1) / 2)
 
         # print(direction, self["grid"]["matrix"])
@@ -1025,16 +1055,16 @@ def Game(root: tkinter.Tk, isload:bool, data=None):
 
     # make buttons for the keys
     IconButton(self["canvas"], int(center - (4 * self["padding"] + 4.9 * self["size"])),
-               height + 3 * (self["size"] + self["padding"]) + self["padding"],
+               self["height"] + 3 * (self["size"] + self["padding"]) + self["padding"],
                "left.png", command=lambda: action(self, "up"), size=(200, 200))
     IconButton(self["canvas"], int(center - (1.5 * self["padding"] + 4.4 * self["size"])),
-               height + 3 * (self["size"] + self["padding"]) + self["padding"],
+               self["height"] + 3 * (self["size"] + self["padding"]) + self["padding"],
                "right.png", command=lambda: action(self, "down"), size=(200, 200))
     IconButton(self["canvas"], int(center - (2.5 * self["padding"] + 4.7 * self["size"])),
-               int(height + 2.5 * (self["size"] + self["padding"]) + self["padding"]),
+               int(self["height"] + 2.5 * (self["size"] + self["padding"]) + self["padding"]),
                "up.png", command=lambda: action(self, "left"), size=(200, 200))
     IconButton(self["canvas"], int(center - (0.5 * self["padding"] + 5 * self["size"])),
-               int(height + 3.5 * (self["size"] + self["padding"]) + self["padding"]),
+               int(self["height"] + 3.5 * (self["size"] + self["padding"]) + self["padding"]),
                "down.png", command=lambda: action(self, "right"), size=(200, 200))
 
     # bind the keys
@@ -1044,7 +1074,7 @@ def Game(root: tkinter.Tk, isload:bool, data=None):
     root.bind("<KeyPress-Right>", lambda event: action(self, "down"))
     print("jeu : ", self["grid"]["matrix"])
 
-    #check if the game was loaded from a save
+    # check if the game was loaded from a save
     if self["grid"]["matrix"] == [[0 for _ in range(4)] for _ in range(4)]:
         self["grid"]["add_tile"](self["grid"])
         self["grid"]["add_tile"](self["grid"])
@@ -1052,7 +1082,7 @@ def Game(root: tkinter.Tk, isload:bool, data=None):
     print("jeu : ", self["grid"]["matrix"])
 
 
-#making the 2048 4D window
+# making the 2048 4D window
 def Game4D(root: tkinter.Tk, isload: bool, data=None):
     """Fait une fentre de jeu grâce à Tkinter."""
     self = {
@@ -1062,7 +1092,7 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None):
     self["canvas"] = tkinter.Canvas(self["frame"], width=root.winfo_width(), height=root.winfo_height(), bg="#F3E6E4")
     self["canvas"].pack()
     self["canvas"].create_text(root.winfo_width() // 2, 20, anchor="n", text="2048", font='Helvetica 80 bold',
-                            fill="#776e65")
+                               fill="#776e65")
     # making a background for the game that is centered
     center = root.winfo_width() // 2
     self["size"] = root.winfo_height() // 7
@@ -1072,8 +1102,8 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None):
                     int(center + (3 * self["padding"] + 2 * self["size"])),
                     height + (4 * self["size"] + 6 * self["padding"]),
                     radius=10, fill="#bbada0")
-    
-    #Buttons to go back to main menu and to quit
+
+    # Buttons to go back to main menu and to quit
     BetterButton(self["canvas"], int(root.winfo_width() // 1.2), root.winfo_height() // 2, "Menu", anchor="n",
                  size=(200, 50), command=lambda: Menu(root), text_color=(255, 255, 255), color=(119, 110, 101),
                  hover_color=(150, 140, 130))
@@ -1085,10 +1115,12 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None):
     BetterButton(self["canvas"], point[0], point[1] + 120, "Sauvegarder",
                  command=lambda: save(self["grid"]["matrix"], "4D"),
                  size=(200, 50), anchor="n", text_color=(255, 255, 255), color=(119, 110, 101),
-                 hover_color=(150, 140, 130))  
-        # create empty tiles for the grid
-    self["tiles"] = [[[None, None], [None, None]], [[None, None], [None, None]], [[None, None], [None, None]], [[None, None], [None, None]]]
-    self["texts"] = [[[None, None], [None, None]], [[None, None], [None, None]], [[None, None], [None, None]], [[None, None], [None, None]]]
+                 hover_color=(150, 140, 130))
+    # create empty tiles for the grid
+    self["tiles"] = [[[None, None], [None, None]], [[None, None], [None, None]], [[None, None], [None, None]],
+                     [[None, None], [None, None]]]
+    self["texts"] = [[[None, None], [None, None]], [[None, None], [None, None]], [[None, None], [None, None]],
+                     [[None, None], [None, None]]]
     # create the grid
     spacex = 10
     spacey = 0
@@ -1103,7 +1135,7 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None):
             round_rectangle(self["canvas"],
                             int(center - (2.5 * self["padding"] + 2 * self["size"]) + j * (
                                     self["size"] + self["padding"]) + spacex),
-                                    height + i * (self["size"] + self["padding"]) + self["padding"] + spacey,
+                            height + i * (self["size"] + self["padding"]) + self["padding"] + spacey,
                             int(center - (2.5 * self["padding"] + 2 * self["size"]) + j * (
                                     self["size"] + self["padding"]) + self["size"] + spacex),
                             height + i * (self["size"] + self["padding"]) + self["size"] +
@@ -1123,8 +1155,7 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None):
                      128: "#edcf72",
                      256: "#edcc61", 512: "#edc850", 1024: "#edc53f", 2048: "#edc22e"}
 
-    #show the tiles when the game starts
-
+    # show the tiles when the game starts
 
     # update the tiles with the right color and text when the matrix change
     # update the tiles with the new matrix
@@ -1160,7 +1191,6 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None):
     #                                 self["size"] + self["padding"]) + 10,
     #                         text=str(self["grid"]["matrix"][i][j][k]), font='Helvetica 30 bold', fill="#776e65")
 
-
     # update the tiles when the matrix change
     # update(self)
 
@@ -1173,9 +1203,9 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None):
         # move the tiles
         self["grid"]["move"](self["grid"], direction)
         # update the tiles
-        #update(self)
+        # update(self)
         # update the score
-        #self["score"]["text"] = "Score : " + str(self["grid"]["score"])
+        # self["score"]["text"] = "Score : " + str(self["grid"]["score"])
 
     # bind the keys to the grid
     root.bind("<KeyPress-Up>", lambda event: [action(self, "up"), print("jeu : ", self["grid"]["matrix"])])
@@ -1183,6 +1213,7 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None):
     root.bind("<KeyPress-Left>", lambda event: [action(self, "left"), print("jeu : ", self["grid"]["matrix"])])
     root.bind("<KeyPress-Right>", lambda event: [action(self, "right"), print("jeu : ", self["grid"]["matrix"])])
     print("jeu : ", self["grid"]["matrix"])
+
 
 def main():
     # create the root
