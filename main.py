@@ -118,7 +118,7 @@ def SimpleGrid() -> dict:
         """
 
         for i in range(2):
-            generate_new_tile(self, get_empty_tiles(self))
+            generate_new_tile(self)
 
     def get_empty_tiles(self: dict) -> list:
         """
@@ -135,12 +135,13 @@ def SimpleGrid() -> dict:
 
         return empty_tiles
 
-    def generate_new_tile(self: dict, empty_tiles: list):
+    def generate_new_tile(self: dict):
         """
         Génère une nouvelle tuile de valeur 2 ou 4 aléatoirement sur la grille.
         :param dict self: Dictionnaire contenant la grille de jeu.
-        :param empty_tiles: Liste des positions vides.
         """
+
+        empty_tiles = get_empty_tiles(self)
 
         if empty_tiles:
             x, y = empty_tiles[randint(0, len(empty_tiles) - 1)]
@@ -207,11 +208,7 @@ def SimpleGrid() -> dict:
             "fusion": [],
         }
 
-        empty_tiles = get_empty_tiles(self)
-
-        if check_win(self):
-            return data
-        elif check_lose(self, empty_tiles):
+        if check_lose(self, get_empty_tiles(self)):
             return data
 
         pos = []
@@ -258,7 +255,7 @@ def SimpleGrid() -> dict:
 
         # Génère une nouvelle tuile si une fusion ou un mouvement a eu lieu
         if data["mouvement"] or data["fusion"]:
-            generate_new_tile(self, get_empty_tiles(self))
+            generate_new_tile(self)
 
         return data
 
