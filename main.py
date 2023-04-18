@@ -1038,7 +1038,7 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
         """Fonction qui fait bouger les tuiles et qui met à jour le score."""
         if self["guard_rail"]:
             return
-        animation_duration = 200
+        animation_duration = 100
         move_data = self["grid"]["move"](self["grid"], direction)
         if not (len(move_data["mouvement"]) == 0 and len(move_data["fusion"]) == 0):
             self["guard_rail"] = True
@@ -1055,18 +1055,15 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
         self["canvas"].itemconfig(self["score"], text="Score : " + str(self["grid"]["score"]))
 
     # make buttons for the keys
-    IconButton(self["canvas"], int(center - (4 * self["padding"] + 4.9 * self["size"])),
-               self["height"] + 3 * (self["size"] + self["padding"]) + self["padding"],
-               "left.png", command=lambda: action(self, "up"), size=(200, 200))
-    IconButton(self["canvas"], int(center - (1.5 * self["padding"] + 4.4 * self["size"])),
-               self["height"] + 3 * (self["size"] + self["padding"]) + self["padding"],
-               "right.png", command=lambda: action(self, "down"), size=(200, 200))
-    IconButton(self["canvas"], int(center - (2.5 * self["padding"] + 4.7 * self["size"])),
-               int(self["height"] + 2.5 * (self["size"] + self["padding"]) + self["padding"]),
-               "up.png", command=lambda: action(self, "left"), size=(200, 200))
-    IconButton(self["canvas"], int(center - (0.5 * self["padding"] + 5 * self["size"])),
-               int(self["height"] + 3.5 * (self["size"] + self["padding"]) + self["padding"]),
-               "down.png", command=lambda: action(self, "right"), size=(200, 200))
+    left_padding = 100
+    IconButton(self["canvas"], left_padding + 25 + 50, int(root.winfo_height() * 0.9),
+               "down.png", command=lambda: action(self, "right"), size=(50, 50), hover_icon="down_hover.png")
+    IconButton(self["canvas"], 100 + left_padding + 50, int(root.winfo_height() * 0.9 - 25 - 50),
+               "right.png", command=lambda: action(self, "down"), size=(50, 50), hover_icon="right_hover.png")
+    IconButton(self["canvas"], left_padding, int(root.winfo_height() * 0.9 - 25 - 50),
+               "left.png", command=lambda: action(self, "up"), size=(50, 50), hover_icon="left_hover.png")
+    IconButton(self["canvas"], left_padding + 25 + 50, int(root.winfo_height() * 0.9 - 50 - 100),
+               "up.png", command=lambda: action(self, "left"), size=(50, 50), hover_icon="up_hover.png")
 
     # bind the keys
     root.bind("<KeyPress-Up>", lambda event: action(self, "left"))
