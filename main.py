@@ -337,7 +337,9 @@ def SimpleGrid() -> dict:
                 self["matrix"] = [row[:] for row in save_matrix]
 
         # On déplace la tuile dans la direction qui a la meilleure valeur heuristique.
-        move(self, max(best_move, key=best_move.get))
+        data = move(self, max(best_move, key=best_move.get))
+
+        return data
 
     config = {
 
