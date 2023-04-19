@@ -956,7 +956,6 @@ def verify_load(root: tkinter.Tk):
         Game(root, True, data)
 
 
-# making the 2048 normal mode window 
 def Game(root: tkinter.Tk, isload: bool, data=None):
     """
     Fait une fenetre de jeu grâce à Tkinter.
@@ -1311,7 +1310,6 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None) -> dict:
         self["grid"]["matrix"] = data["matrix"]
     else:
         self["grid"]["start"](self["grid"])
-    self["grid"]["start"](self["grid"])
 
     # Color of the tiles. Same as the normal game.
     self["color"] = {0: "#cdc1b4", 2: "#eee4da", 4: "#ede0c8", 8: "#f2b179", 16: "#f59563", 32: "#f67c5f",
