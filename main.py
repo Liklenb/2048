@@ -1,3 +1,4 @@
+import os
 import time
 import tkinter.font
 
@@ -579,7 +580,8 @@ def Grid4D():
 
 
 def rgb_to_tkinter(rgb: tuple[int, int, int]):
-    """translates an rgb tuple of int to a tkinter friendly color code
+    """
+    translates a rgb tuple of int to a tkinter friendly color code
     """
     return f'#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}'
 
@@ -634,26 +636,68 @@ def BetterButton(canvas: tkinter.Canvas,
                  size: tuple[int, int] = None,
                  border_radius: int = 50,
                  font: tkinter.font.Font = None,
-                 anchor: str = "nw", ):
+                 anchor: str = "nw", ) -> dict:
+    """
+    Create a button with a better look.
+    :param canvas: the canvas on which the button will be drawn
+    :param x: the x position of the button
+    :param y: the y position of the button
+    :param text: the text of the button
+    :param text_color: the color of the text
+    :param color: the color of the button
+    :param hover_color: the color of the button when the mouse is over it
+    :param hover_text_color: the color of the text when the mouse is over the button
+    :param command: the command to execute when the button is clicked
+    :param padding: the space between the text and the border of the button
+    :param size: the size of the button (overrides the padding)
+    :param border_radius: the radius of the border
+    :param font: the font of the text
+    :param anchor: the anchor of the button
+    :return: the button
+    """
+
+    # define all default values of the button
     self = {"canvas": canvas, "x": x, "y": y, "text": text, "color": color, "hover_color": hover_color,
             "hover_text_color": hover_text_color, "command": command, "hover": False, "padding": padding,
             "border_radius": border_radius, "font": font, "text_color": text_color, "anchor": anchor}
 
-    def hover_on(self: dict):
+    def hover_on(self: dict) -> None:
+        """
+        Change the color of the button when the mouse is over it
+        :param self: the button
+        :return:
+        """
         self["hover"] = True
         self["canvas"].itemconfig(self["text_canvas"], fill=rgb_to_tkinter(self["hover_text_color"]))
         self["canvas"].itemconfig(self["button"], fill=rgb_to_tkinter(self["hover_color"]))
 
-    def hover_off(self: dict):
+    def hover_off(self: dict) -> None:
+        """
+        Change the color of the button when the mouse is not over it
+        :param self: the button
+        :return:
+        """
         self["hover"] = False
         self["canvas"].itemconfig(self["button"], fill=rgb_to_tkinter(self["color"]))
         self["canvas"].itemconfig(self["text_canvas"], fill=rgb_to_tkinter(self["text_color"]))
 
-    def click(self: dict):
+    def click(self: dict) -> None:
+        """
+        Execute the command of the button when it is clicked
+        :param self: the button
+        :return:
+        """
         if self["hover"]:
             self["command"]()
 
-    def get_anchor_position(self: dict, x: int, y: int):
+    def get_anchor_position(self: dict, x: int, y: int) -> tuple[int, int]:
+        """
+        Transpose the position from the given anchor to the nw anchor
+        :param self: the button
+        :param x: the x position at the given anchor
+        :param y: the y position at the given anchor
+        :return: the x and y position at the nw anchor
+        """
         if self["anchor"] == "center":
             x -= self["size"][0] / 2
             y -= self["size"][1] / 2
@@ -676,17 +720,26 @@ def BetterButton(canvas: tkinter.Canvas,
             y -= self["size"][1]
         return x, y
 
-    def build(self: dict):
+    def build(self: dict) -> None:
+        """
+        Build the button on the canvas
+        :param self: the button
+        :return:
+        """
+        # check if the mouse is over the button and choose the right color
         if self["hover"]:
             color = self["hover_color"]
             text_color = self["hover_text_color"]
         else:
             color = self["color"]
             text_color = self["text_color"]
+
+        # create the button
         self["button"] = round_rectangle(self["canvas"], self["x"], self["y"],
                                          self["x"] + self["text_size"][0] + self["padding"][0],
                                          self["y"] + self["text_size"][1] + self["padding"][1],
                                          radius=self["border_radius"], fill=rgb_to_tkinter(color))
+        # create the text
         self["text_canvas"] = self["canvas"].create_text(self["x"] + (self["padding"][0] + self["text_size"][0]) / 2,
                                                          self["y"] + self["padding"][1] / 2,
                                                          text=self["text"],
@@ -702,6 +755,7 @@ def BetterButton(canvas: tkinter.Canvas,
         self["canvas"].tag_bind(self["button"], "<Leave>", lambda e: self["hover_off"](self))
         self["canvas"].tag_bind(self["button"], "<Button-1>", lambda e: self["click"](self))
 
+    # add all the methods to the button
     self["hover_on"] = hover_on
     self["hover_off"] = hover_off
     self["click"] = click
@@ -714,11 +768,15 @@ def BetterButton(canvas: tkinter.Canvas,
     self["text_size"] = self["font"].measure(self["text"]), self["font"].metrics("linespace")
 
     if size:
+        # if the size is specified, use it
         self["padding"] = size[0] - self["text_size"][0], size[1] - self["text_size"][1]
     self["size"] = self["text_size"][0] + self["padding"][0], self["text_size"][1] + self["padding"][1]
+    # get the position of the button with nw anchor
     self["x"], self["y"] = self["get_anchor_position"](self, self["x"], self["y"])
+    # build the button
     self["build"](self)
 
+    # return the button
     return self
 
 
@@ -731,25 +789,62 @@ def IconButton(canvas: tkinter.Canvas,
                size: tuple[int, int] = None,
                border_radius: int = 50,
                anchor: str = "nw", ):
+    """
+    Create an icon button
+    :param canvas: the canvas where the button will be created
+    :param x: the x position of the button
+    :param y: the y position of the button
+    :param icon: the path of the icon
+    :param hover_icon: the path of the icon when the mouse is over the button
+    :param command: the command of the button
+    :param size: the size of the button (if not specified, the size of the icon will be used)
+    :param border_radius: the border radius of the button
+    :param anchor: the anchor of the button
+    :return: the button
+    """
+
+    # define the default values
     self = {"canvas": canvas, "x": x, "y": y, "icon": icon,
             "hover_icon": hover_icon, "command": command, "hover": False,
             "border_radius": border_radius, "anchor": anchor, "size": size}
 
-    def hover_on(self: dict):
+    def hover_on(self: dict) -> None:
+        """
+        Change the icon of the button when the mouse is over it
+        :param self: the button
+        :return:
+        """
         self["hover"] = True
         self["canvas"].itemconfig(self["button"],
                                   image=self["hover_textureTk"])
 
-    def hover_off(self: dict):
+    def hover_off(self: dict) -> None:
+        """
+        Change the icon of the button when the mouse is not over it
+        :param self: the button
+        :return:
+        """
         self["hover"] = False
         self["canvas"].itemconfig(self["button"],
                                   image=self["textureTk"])
 
-    def click(self: dict):
+    def click(self: dict) -> None:
+        """
+        Execute the command of the button
+        :param self: the button
+        :return:
+        """
         if self["hover"]:
             self["command"]()
 
-    def get_anchor_position(self: dict, x: int, y: int):
+    def get_anchor_position(self: dict, x: int, y: int) -> tuple[int, int]:
+        """
+        Transpose the position from the given anchor to the nw anchor
+        :param self: the button
+        :param x: the x position at the given anchor
+        :param y: the y position at the given anchor
+        :return: the x and y position at the nw anchor
+        """
         if self["anchor"] == "center":
             x -= self["size"][0] / 2
             y -= self["size"][1] / 2
@@ -772,37 +867,52 @@ def IconButton(canvas: tkinter.Canvas,
             y -= self["size"][1]
         return x, y
 
-    def build(self: dict):
+    def build(self: dict) -> None:
+        """
+        Build the button
+        :param self: the button
+        :return:
+        """
+
+        # check if the mouse is over the button and choose the right icon
         if self["hover"]:
             image = "hover_textureTk"
         else:
             image = "textureTk"
+        # create the button
         self["button"] = self["canvas"].create_image(self["x"], self["y"], image=self[image], anchor="nw")
         # bind the mouse events
         self["canvas"].tag_bind(self["button"], "<Enter>", lambda e: self["hover_on"](self))
         self["canvas"].tag_bind(self["button"], "<Leave>", lambda e: self["hover_off"](self))
         self["canvas"].tag_bind(self["button"], "<Button-1>", lambda e: self["click"](self))
 
+    # add all the methods to the button
     self["hover_on"] = hover_on
     self["hover_off"] = hover_off
     self["click"] = click
     self["get_anchor_position"] = get_anchor_position
     self["build"] = build
 
+    # load the icon
     self["texture"] = Image.open(self["icon"])
     if not self["hover_icon"]:
         self["hover_icon"] = self["icon"]
+    # load the hover icon
     self["hover_texture"] = Image.open(self["hover_icon"])
 
     if not size:
+        # get the size of the icon
         self["size"] = self["texture"].size
+    # get the position of the button with nw anchor
     self["x"], self["y"] = self["get_anchor_position"](self, self["x"], self["y"])
+    # resize the icons
     self["textureTk"] = ImageTk.PhotoImage(self["texture"].resize(self["size"]))
     self["hover_textureTk"] = ImageTk.PhotoImage(self["hover_texture"].resize(self["size"]))
+    # build the button
     self["build"](self)
 
+    # return the button
     return self
-
 
 # making the menu
 def Menu(root: tkinter.Tk):
@@ -812,7 +922,8 @@ def Menu(root: tkinter.Tk):
     self["canvas"] = tkinter.Canvas(self["frame"], width=root.winfo_width(), height=root.winfo_height(), bg="#a39489")
     self["canvas"].pack()
     self["grid"] = SimpleGrid()
-    self["canvas"].create_text(root.winfo_width() // 2, 20, anchor="n", text="2048", font='Roboto 300 bold',
+    self["canvas"].create_text(root.winfo_width() // 2, 20, anchor="n", text="2048",
+                               font=tkinter.font.Font(family="Roboto", size=int(root.winfo_height() * 0.25), weight="bold"),
                                fill="#776e65")
     point = int(root.winfo_width() // 2), int(root.winfo_height() // 2.35)
     BetterButton(self["canvas"], point[0], point[1], "Classique", anchor="n",
@@ -871,19 +982,23 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
                  size=(200, 50), anchor="n", text_color=(255, 255, 255), color=(119, 110, 101),
                  hover_color=(150, 140, 130))
 
-    # button for ai
-    BetterButton(self["canvas"], point[0], point[1] + 180, "AI",
-                 anchor="n",
-                 size=(200, 50), command=lambda: ai_update(), text_color=(255, 255, 255),
-                 color=(119, 110, 101),
-                 hover_color=(150, 140, 130))
-
     def ai_update():
-        while not self["grid"]["check_lose"](self["grid"], self["grid"]["get_empty_tiles"](self["grid"])):
-            if self["grid"]["check_win"](self["grid"]):
-                break
-            self["grid"]["ai"](self["grid"])
-            update(self)
+        if not self["grid"]["check_lose"](self["grid"], self["grid"]["get_empty_tiles"](self["grid"])):
+            if not self["guard_rail"]:
+                self["guard_rail"] = True
+                move_data = self["grid"]["ai"](self["grid"])
+                animation_duration = 100
+
+                for movement in move_data["mouvement"]:
+                    self["animation"](self, movement["from"], movement["to"], animation_duration, fps=144,
+                                      function=lambda x: -(math.cos(math.pi * x) - 1) / 2)
+                for fusion in move_data["fusion"]:
+                    self["animation"](self, fusion["from"], fusion["to"], animation_duration, fps=144,
+                                      function=lambda x: -(math.cos(math.pi * x) - 1) / 2)
+
+                self["canvas"].after(animation_duration + 10, self["ai_update"])
+            else:
+                self["canvas"].after(10, self["ai_update"])
 
     # making a background for the game that is centered
     center = root.winfo_width() // 2
@@ -951,7 +1066,7 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
         if self["grid"]["check_lose"](self["grid"], self["grid"]["get_empty_tiles"](self["grid"])):
             # let's fade the grid with a pil image
             self["lose_fade"] = self["canvas"].create_image(center, self["height"], image=self["fade_frames"][0], anchor="n")
-            self["canvas"].after(1, self["fade"], 1)
+            self["canvas"].after(5, self["fade"], 1)
             # creating the text
             self["canvas"].create_text(center, self["height"] + self["size"] * 2 + self["padding"] * 3,
                                        text="vous avez perdu !", font='Helvetica 40 bold',
@@ -960,7 +1075,7 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
     def fade(current_opacity: int):
         self["canvas"].itemconfig(self["lose_fade"], image=self["fade_frames"][current_opacity])
         if current_opacity < len(self["fade_frames"]) - 1:
-            self["canvas"].after(1, self["fade"], current_opacity + 1)
+            self["canvas"].after(5, self["fade"], current_opacity + 1)
 
     # generating images for the fade
     image = Image.new("RGBA", (self["size"] * 4 + self["padding"] * 5, self["size"] * 4 + self["padding"] * 5),
@@ -988,7 +1103,7 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
                 begin: float, fps=60):
         """Anime les tuiles."""
         if (time.time() - begin) * 1000 < duration:
-            self["canvas"].after(1000 // fps,
+            self["canvas"].after(1,
                                  lambda: self["animate"](self, frames, start, start_coords, text_start_coords, frames_length, duration, begin, fps))
         else:
             self["update"](self)
@@ -1009,11 +1124,11 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
     self["animate"] = animate
     self["update"] = update
     self["fade"] = fade
+    self["ai_update"] = ai_update
     self["guard_rail"] = False
 
     if isload == True:
         self["grid"]["matrix"] = data["matrix"]
-        print(data["matrix"])
     else:
         self["grid"]["start"](self["grid"])
 
@@ -1029,6 +1144,13 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
                      1048576: "#3c3a32", 2097152: "#3c3a32", 4194304: "#3c3a32", 8388608: "#3c3a32",
                      16777216: "#3c3a32",
                      33554432: "#3c3a32", 67108864: "#3c3a32", 134217728: "#3c3a32", 268435456: "#3c3a32"}
+
+    # button for ai
+    BetterButton(self["canvas"], point[0], point[1] + 180, "AI",
+                 anchor="n",
+                 size=(200, 50), command=self["ai_update"], text_color=(255, 255, 255),
+                 color=(119, 110, 101),
+                 hover_color=(150, 140, 130))
 
     # make the tiles with the matrix
 
@@ -1080,7 +1202,6 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
     root.bind("<KeyPress-Down>", lambda event: action(self, "right"))
     root.bind("<KeyPress-Left>", lambda event: action(self, "up"))
     root.bind("<KeyPress-Right>", lambda event: action(self, "down"))
-    print("jeu : ", self["grid"]["matrix"])
 
     # check if the game was loaded from a save
     if self["grid"]["matrix"] == [[0 for _ in range(4)] for _ in range(4)]:
@@ -1100,6 +1221,7 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None) -> dict:
     """
     self = {
         "frame": tkinter.Frame(root),
+        "guard_rail": False
     }
     self["frame"].grid(row=0, column=0)
     self["canvas"] = tkinter.Canvas(self["frame"], width=root.winfo_width(), height=root.winfo_height(), bg="#F3E6E4")
@@ -1112,7 +1234,8 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None) -> dict:
     self["padding"] = 15
     height = int(root.winfo_height() // 3.5)
     self["height"] = height
-    round_rectangle(self["canvas"], int(center - (3 * self["padding"] + 2 * self["size"])), height,
+    round_rectangle(self["canvas"], int(center - (3 * self["padding"] + 2 * self["size"])),
+                    height,
                     int(center + (3 * self["padding"] + 2 * self["size"])),
                     height + (4 * self["size"] + 6 * self["padding"]),
                     radius=10, fill="#bbada0")
@@ -1131,6 +1254,29 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None) -> dict:
                  size=(200, 50), anchor="n", text_color=(255, 255, 255), color=(119, 110, 101),
                  hover_color=(150, 140, 130))
     # create empty tiles for the grid
+
+    # make buttons for the keys
+    icon_button_size = 50
+    icon_button_padding = 20
+    left_padding = 0.5 * (
+                center - (2 * self["size"] + 2.5 * self["padding"])) - icon_button_size * 1.5 - icon_button_padding
+    pos_y = int(
+        self["height"] + 3 * self["size"] + 3.5 * self["padding"] + 0.5 * icon_button_size + 1 * icon_button_padding)
+    IconButton(self["canvas"], left_padding + icon_button_padding + icon_button_size, pos_y,
+               "down.png", command=lambda: action(self, "down"), size=(icon_button_size, icon_button_size),
+               hover_icon="down_hover.png")
+    IconButton(self["canvas"], 2 * icon_button_size + left_padding + 2 * icon_button_padding,
+               int(pos_y - icon_button_padding - icon_button_size),
+               "right.png", command=lambda: action(self, "right"), size=(icon_button_size, icon_button_size),
+               hover_icon="right_hover.png")
+    IconButton(self["canvas"], left_padding, int(pos_y - icon_button_padding - icon_button_size),
+               "left.png", command=lambda: action(self, "left"), size=(icon_button_size, icon_button_size),
+               hover_icon="left_hover.png")
+    IconButton(self["canvas"], left_padding + icon_button_padding + icon_button_size,
+               int(pos_y - 2 * icon_button_padding - 2 * icon_button_size),
+               "up.png", command=lambda: action(self, "up"), size=(icon_button_size, icon_button_size),
+               hover_icon="up_hover.png")
+
     self["tiles"] = [[[None, None], [None, None]], [[None, None], [None, None]], [[None, None], [None, None]],
                      [[None, None], [None, None]]]
     self["texts"] = [[[None, None], [None, None]], [[None, None], [None, None]], [[None, None], [None, None]],
@@ -1163,7 +1309,6 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None) -> dict:
     self["grid"] = Grid4D()
     if isload == True:
         self["grid"]["matrix"] = data["matrix"]
-        print(data["matrix"])
     else:
         self["grid"]["start"](self["grid"])
     self["grid"]["start"](self["grid"])
@@ -1205,8 +1350,48 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None) -> dict:
                 current_x -= 2 * self["size"] + 3 * self["padding"]
                 current_y += self["padding"]
 
-    # update the tiles when the matrix change
-    update(self)
+        # if the player lose we show a black background with a text
+        if self["grid"]["check_lose"](self["grid"], self["grid"]["get_empty_tiles"](self["grid"])):
+            # let's fade the grid with a pil image
+            self["lose_fade"] = self["canvas"].create_image(center, self["height"],
+                                                            image=self["fade_frames"][0],
+                                                            anchor="n")
+            self["canvas"].after(5, self["fade"], 1)
+            # creating the text
+            self["canvas"].create_text(center, self["height"] + self["size"] * 2 + self["padding"] * 3,
+                                       text="vous avez perdu !", font='Helvetica 40 bold',
+                                       fill="white")
+    def animation(self: dict, start: tuple[int, int], end: tuple[int, int], duration: int, function=lambda x: x,
+                  fps=60):
+        """Génère une animation."""
+        frame_count = int(duration * fps / 1000)
+        movement = (end[2] - start[2], end[1] - start[1])
+        pixel_gap = self["size"] + self["padding"]
+        frames = []
+        for i in range(frame_count):
+            pourcentage = function(i / frame_count)
+            frames.append((int(movement[0] * pourcentage * pixel_gap),
+                           int(movement[1] * pourcentage * pixel_gap)))
+        begin = time.time()
+        self["animate"](self, frames, start, self["canvas"].coords(self["tiles"][start[0]][start[1]][start[2]]), self["canvas"].coords(self["texts"][start[0]][start[1]][start[2]]), len(frames) - 1, duration, begin, fps)
+
+    def animate(self: dict, frames: list[tuple[int, int]], start: tuple[int, int], start_coords: tuple[int, int], text_start_coords: tuple[int, int], frames_length: int, duration: int,
+                begin: float, fps=60):
+        """Anime les tuiles."""
+        if (time.time() - begin) * 1000 < duration:
+            self["canvas"].after(1,
+                                 lambda: self["animate"](self, frames, start, start_coords, text_start_coords, frames_length, duration, begin, fps))
+        else:
+            self["update"](self)
+            self["guard_rail"] = False
+            return
+        frame = int(((time.time() - begin) * 1000) / duration * frames_length)
+        self["canvas"].moveto(self["tiles"][start[0]][start[1]][start[2]],
+                              frames[frame][0] + start_coords[0] - 26,
+                              frames[frame][1] + start_coords[1], )
+        self["canvas"].coords(self["texts"][start[0]][start[1]][start[2]],
+                              frames[frame][0] + text_start_coords[0],
+                              frames[frame][1] + text_start_coords[1])
 
     self["score"] = self["canvas"].create_text(root.winfo_width() // 2, root.winfo_height() // 4.5, anchor="n",
                                                text="Score : " + str(self["grid"]["score"]), font='Helvetica 30 bold',
@@ -1215,18 +1400,52 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None) -> dict:
     def action(self, direction):
         """Fonction qui fait bouger les tuiles et qui met à jour le score."""
         # move the tiles
-        self["grid"]["move"](self["grid"], direction)
+        if self["guard_rail"]:
+            return
+        move_data = self["grid"]["move"](self["grid"], direction)
+        if move_data["mouvement"] == [] and move_data["fusion"] == []:
+            return
+        animation_duration = 100
+        self["guard_rail"] = True
         # update the tiles
-        update(self)
-        # update the score
-        # self["score"]["text"] = "Score : " + str(self["grid"]["score"])
+        for movement in move_data["mouvement"]:
+            self["animation"](self, movement["from"], movement["to"], animation_duration, fps=144,
+                              function=lambda x: -(math.cos(math.pi * x) - 1) / 2)
+        for fusion in move_data["fusion"]:
+            self["animation"](self, fusion["from"], fusion["to"], animation_duration, fps=144,
+                              function=lambda x: -(math.cos(math.pi * x) - 1) / 2)
+
+    def fade(current_opacity: int):
+        self["canvas"].itemconfig(self["lose_fade"], image=self["fade_frames"][current_opacity])
+        if current_opacity < len(self["fade_frames"]) - 1:
+            self["canvas"].after(1, self["fade"], current_opacity + 1)
+
+    # generating images for the fade
+    image = Image.new("RGBA", (self["size"] * 4 + self["padding"] * 6, self["size"] * 4 + self["padding"] * 6),
+                      (0, 0, 0, 0))
+    self["fade_frames"] = []
+    for i in range(0, 170, 10):
+        image.putalpha(i)
+        self["fade_frames"].append(ImageTk.PhotoImage(image))
+    # update the score
+    # self["score"]["text"] = "Score : " + str(self["grid"]["score"])
+
+
+    self["action"] = action
+    self["animate"] = animate
+    self["update"] = update
+    self["animation"] = animation
+    self["fade"] = fade
+
 
     # bind the keys to the grid
-    root.bind("<KeyPress-Up>", lambda event: [action(self, "up"), print("jeu : ", self["grid"]["matrix"])])
-    root.bind("<KeyPress-Down>", lambda event: [action(self, "down"), print("jeu : ", self["grid"]["matrix"])])
-    root.bind("<KeyPress-Left>", lambda event: [action(self, "left"), print("jeu : ", self["grid"]["matrix"])])
-    root.bind("<KeyPress-Right>", lambda event: [action(self, "right"), print("jeu : ", self["grid"]["matrix"])])
-    print("jeu : ", self["grid"]["matrix"])
+    root.bind("<KeyPress-Up>", lambda event: [self["action"](self, "up")])
+    root.bind("<KeyPress-Down>", lambda event: [self["action"](self, "down")])
+    root.bind("<KeyPress-Left>", lambda event: [self["action"](self, "left")])
+    root.bind("<KeyPress-Right>", lambda event: [self["action"](self, "right")])
+
+    # update the tiles when the matrix change
+    self["update"](self)
 
 
 def main():
