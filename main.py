@@ -847,7 +847,9 @@ def verify_load(root: tkinter.Tk):
 
 # making the 2048 normal mode window 
 def Game(root: tkinter.Tk, isload: bool, data=None):
-    """Fait une fentre de jeu grâce à Tkinter."""
+    """
+    Fait une fenetre de jeu grâce à Tkinter.
+    """
     self = {
         "frame": tkinter.Frame(root),
     }
@@ -1020,7 +1022,13 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
     # Color of the tiles.
     self["color"] = {2: "#eee4da", 4: "#ede0c8", 8: "#f2b179", 16: "#f59563", 32: "#f67c5f", 64: "#f65e3b",
                      128: "#edcf72",
-                     256: "#edcc61", 512: "#edc850", 1024: "#edc53f", 2048: "#edc22e"}
+                     256: "#edcc61", 512: "#edc850", 1024: "#edc53f", 2048: "#edc22e", 4096: "#3c3a32",
+                     8192: "#3c3a32",
+                     16384: "#3c3a32", 32768: "#3c3a32", 65536: "#3c3a32", 131072: "#3c3a32", 262144: "#3c3a32",
+                     524288: "#3c3a32",
+                     1048576: "#3c3a32", 2097152: "#3c3a32", 4194304: "#3c3a32", 8388608: "#3c3a32",
+                     16777216: "#3c3a32",
+                     33554432: "#3c3a32", 67108864: "#3c3a32", 134217728: "#3c3a32", 268435456: "#3c3a32"}
 
     # make the tiles with the matrix
 
@@ -1082,8 +1090,14 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
 
 
 # making the 2048 4D window
-def Game4D(root: tkinter.Tk, isload: bool, data=None):
-    """Fait une fentre de jeu grâce à Tkinter."""
+def Game4D(root: tkinter.Tk, isload: bool, data=None) -> dict:
+    """
+    Fonction qui crée la fenêtre du jeu 2048 4D.
+    :param root: The tkinter window
+    :param isload: Whenever the game is loaded from a save or not
+    :param data: grid to load if isload is True
+    :return: The Game4D object
+    """
     self = {
         "frame": tkinter.Frame(root),
     }
@@ -1125,22 +1139,26 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None):
     spacex = 10
     spacey = 0
     # making a 2048 4D grid while adding space in between every block of 4 tiles
+    current_x = center - 2 * self["padding"] - 2 * self["size"]
+    current_y = self["height"] + self["padding"]
     for i in range(4):
-        if i == 2:
-            spacey += 15
-        spacex = 10
-        for j in range(4):
-            if j == 2:
-                spacex += 10
-            round_rectangle(self["canvas"],
-                            int(center - (2.5 * self["padding"] + 2 * self["size"]) + j * (
-                                    self["size"] + self["padding"]) + spacex),
-                            height + i * (self["size"] + self["padding"]) + self["padding"] + spacey,
-                            int(center - (2.5 * self["padding"] + 2 * self["size"]) + j * (
-                                    self["size"] + self["padding"]) + self["size"] + spacex),
-                            height + i * (self["size"] + self["padding"]) + self["size"] +
-                            self["padding"] + spacey,
-                            fill="#cdc1b4", outline="#cdc1b4", radius=10)
+        for j in range(2):
+            for k in range(2):
+                round_rectangle(self["canvas"],
+                                current_x,
+                                current_y,
+                                current_x + self["size"],
+                                current_y + self["size"],
+                                fill="#cdc1b4")
+                current_x += self["padding"] + self["size"]
+            current_x -= 2 * self["padding"] + 2 * self["size"]
+            current_y += self["size"] + self["padding"]
+        if i % 2 == 0:
+            current_x += 2 * self["size"] + 3 * self["padding"]
+            current_y -= 2 * self["size"] + 2 * self["padding"]
+        if i == 1:
+            current_x -= 2 * self["size"] + 3 * self["padding"]
+            current_y += self["padding"]
     # show the tiles on the grid
     self["grid"] = Grid4D()
     if isload == True:
@@ -1151,71 +1169,44 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None):
     self["grid"]["start"](self["grid"])
 
     # Color of the tiles. Same as the normal game.
-    self["color"] = {0: "#cdc1b4", 2: "#eee4da", 4: "#ede0c8", 8: "#f2b179", 16: "#f59563", 32: "#f67c5f", 64: "#f65e3b",
+    self["color"] = {0: "#cdc1b4", 2: "#eee4da", 4: "#ede0c8", 8: "#f2b179", 16: "#f59563", 32: "#f67c5f",
+                     64: "#f65e3b",
                      128: "#edcf72",
                      256: "#edcc61", 512: "#edc850", 1024: "#edc53f", 2048: "#edc22e"}
 
-    pos_x1= center - (1.5 * self["padding"] + 2 * self["size"]) + i * (
-                                                   self["size"] + self["padding"])
-    spacex = 10
-    spacey = 0
     # show the tiles when the game starts
     # update the tiles with the right color and text when the matrix change
     # update the tiles with the new matrix
-    # def update(self):
-    #     """Met à jour les tuiles avec la nouvelle matrice en supprimant l'ancienne."""
-    #     for i in range(4):
-    #         if i == 2:
-    #             spacey += 15
-    #         spacex = 10
-    #         for j in range(2):
-    #             if j == 2:
-    #                 spacex += 10
-    #             for k in range(2):
-    #                 self["canvas"].delete(self["tiles"][i][j][k])
-    #                 self["canvas"].delete(self["texts"][i][j][k])
-    #                 if self["grid"]["matrix"][i][j][k] != 0:
-    #                     self["tiles"][i][j][k] = round_rectangle(self["canvas"],
-    #                                                     #chaque tuile est indivuellement placée en fonction de sa position dans la matrice
-    #                                                     int(center - (1.5 * self["padding"] + 2 * self["size"]) + i * (
-    #                                                             self["size"] + self["padding"])),
-    #                                                     self["height"] + j * (self["size"] + self["padding"]) +
-    #                                                     self["padding"] + k * (self["size"] + self["padding"]) + spacex,
-    #                                                     int(center - (1.5 * self["padding"] + 2 * self["size"]) + i * (
-    #                                                             self["size"] + self["padding"]) +
-    #                                                         self["size"]) + spacey,
-    #                                                     self["height"] + j * (self["size"] + self["padding"]) +
-    #                                                     self["size"] + self["padding"] + k * (
-    #                                                             self["size"] + self["padding"]) + 1,
-    #                                                       fill=self["color"][self["grid"]["matrix"][i][j][k]],
-    #                                                       outline=self["color"][self["grid"]["matrix"][i][j][k]],
-    #                                                       radius=10)
-    #                     self["texts"][i][j][k] = self["canvas"].create_text(
-    #                     int(center - (1.5 * self["padding"] + 2 * self["size"]) + i * (self["size"] + self["padding"]) +
-    #                         self["size"] // 2),
-    #                     self["height"] + j * (self["size"] + self["padding"]) + self["padding"] + self["size"] // 2 +
-    #                     k * (self["size"] + self["padding"]),
-    #                     text=self["grid"]["matrix"][i][j][k], font='Helvetica 40 bold',
-    #                     fill="#776e65")
-    #                 else:
-    #                     self["tiles"][i][j][k] = round_rectangle(self["canvas"],
-    #                         int(center - (1.5 * self["padding"] + 2 * self["size"]) + i * (
-    #                                                             self["size"] + self["padding"])),
-    #                                                     self["height"] + j * (self["size"] + self["padding"]) +
-    #                                                     self["padding"] + k * (self["size"] + self["padding"]),
-    #                                                     int(center - (1.5 * self["padding"] + 2 * self["size"]) + i * (
-    #                                                             self["size"] + self["padding"]) +
-    #                                                         self["size"]),
-    #                                                     self["height"] + j * (self["size"] + self["padding"]) +
-    #                                                     self["size"] + self["padding"] + k * (
-    #                                                             self["size"] + self["padding"]) + 1,
-    #                                                             fill=self["color"][0],
-    #                                                             outline=self["color"][0],
-    #                                                             radius=7)
+    def update(self):
+        """Fonction qui place les tuiles sur la grille 4D."""
+        current_x = center - 2 * self["padding"] - 2 * self["size"]
+        current_y = self["height"] + self["padding"]
+        for i in range(4):
+            for j in range(2):
+                for k in range(2):
+                    self["canvas"].delete(self["tiles"][i][j][k])
+                    self["canvas"].delete(self["texts"][i][j][k])
+                    if self["grid"]["matrix"][i][j][k] != 0:
+                        self["tiles"][i][j][k] = round_rectangle(self["canvas"],
+                                                                 current_x,
+                                                                 current_y,
+                                                                 current_x + self["size"],
+                                                                 current_y + self["size"],
+                                                                 fill=self["color"][self["grid"]["matrix"][i][j][k]])
+                        self["texts"][i][j][k] = self["canvas"].create_text(current_x + self["size"] // 2, current_y + self["size"] // 2,
+                                                                            text=self["grid"]["matrix"][i][j][k], anchor="center", font=tkinter.font.Font(size=40, family="Helvetica", weight=tkinter.font.BOLD), fill="#776e65")
+                    current_x += self["padding"] + self["size"]
+                current_x -= 2 * self["padding"] + 2 * self["size"]
+                current_y += self["size"] + self["padding"]
+            if 0 == i % 2:
+                current_x += 2 * self["size"] + 3 * self["padding"]
+                current_y -= 2 * self["size"] + 2 * self["padding"]
+            elif i == 1:
+                current_x -= 2 * self["size"] + 3 * self["padding"]
+                current_y += self["padding"]
 
-
-    # # update the tiles when the matrix change
-    # update(self)
+    # update the tiles when the matrix change
+    update(self)
 
     self["score"] = self["canvas"].create_text(root.winfo_width() // 2, root.winfo_height() // 4.5, anchor="n",
                                                text="Score : " + str(self["grid"]["score"]), font='Helvetica 30 bold',
@@ -1227,8 +1218,8 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None):
         self["grid"]["move"](self["grid"], direction)
         # update the tiles
         update(self)
-        #update the score
-        #self["score"]["text"] = "Score : " + str(self["grid"]["score"])
+        # update the score
+        # self["score"]["text"] = "Score : " + str(self["grid"]["score"])
 
     # bind the keys to the grid
     root.bind("<KeyPress-Up>", lambda event: [action(self, "up"), print("jeu : ", self["grid"]["matrix"])])
