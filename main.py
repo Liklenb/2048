@@ -1457,6 +1457,7 @@ def main():
     root.update()
     root.state('zoomed')
     root.resizable(False, False)
+    root.iconphoto(False, ImageTk.PhotoImage(file="2048.png"))
 
     Menu(root)
 
