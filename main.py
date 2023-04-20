@@ -947,6 +947,70 @@ def Menu(root: tkinter.Tk):
     self["canvas"] = tkinter.Canvas(self["frame"], width=root.winfo_width(), height=root.winfo_height(), bg="#a39489")
     self["canvas"].pack()
     self["grid"] = SimpleGrid()
+
+    def show_message_box(title: str, message: str) -> None:
+        """
+        Show a message box
+        :param title: the title of the message box
+        :param message: the message of the message box
+        :return:
+        """
+        frame_width = 0.5
+        frame_height = 0.5
+        frame_padding = 20
+
+        elements = []
+        self["message_box_back"] = ImageTk.PhotoImage(
+            Image.new("RGBA", (root.winfo_width(), root.winfo_height()), (0, 0, 0, 200)))
+        elements.append(self["canvas"].create_image(0, 0, image=self["message_box_back"], anchor="nw"))
+        elements.append(round_rectangle(self["canvas"],
+                                        int(root.winfo_width() // 2 - (root.winfo_width() * frame_width // 2)),
+                                        int(root.winfo_height() // 2 - (root.winfo_height() * frame_height // 2)),
+                                        int(root.winfo_width() // 2 + (root.winfo_width() * frame_width // 2)),
+                                        int(root.winfo_height() // 2 + (root.winfo_height() * frame_height // 2)),
+                                        fill="#bbada0"))
+
+        elements.append(self["canvas"].create_text(root.winfo_width() // 2,
+                                                   int(root.winfo_height() // 2 - (
+                                                               root.winfo_height() * frame_height // 2) +
+                                                       frame_padding),
+                                                   text=title,
+                                                   font=tkinter.font.Font(family="Roboto", size=50, weight="bold"),
+                                                   fill="#000000", anchor="n"))
+
+        def destroy():
+            for element in elements:
+                self["canvas"].delete(element)
+            self["canvas"].delete(continue_button["button"])
+            self["canvas"].delete(continue_button["text_canvas"])
+
+        continue_button = BetterButton(self["canvas"], root.winfo_width() // 2,
+                                       int(root.winfo_height() // 2 + (
+                                                   root.winfo_height() * frame_height // 2)) - frame_padding,
+                                       text="Continuer", anchor="s", font=tkinter.font.Font(family="Roboto", size=20),
+                                       command=destroy, text_color=(255, 255, 255), color=(119, 110, 101),
+                                       hover_color=(150, 140, 130), border_radius=60)
+
+        elements.append(self["canvas"].create_text(root.winfo_width() // 2,
+                                                   root.winfo_height() // 2,
+                                                   text=message,
+                                                   font=tkinter.font.Font(family="Roboto", size=20),
+                                                   fill="#000000", anchor="n", justify="center"))
+
+    def verify_load():
+        data = load()
+        if not data:
+            show_message_box("Oups",
+                             "Une erreur est survenue lors du chargement de la partie.\nAvez vous chargé le bon fichier ?")
+            return
+        elif data["type"] == "4D":
+            Game4D(root, True, data)
+        elif data["type"] == "simple":
+            Game(root, True, data)
+
+    self["show_message_box"] = show_message_box
+    self["verify_load"] = verify_load
+
     self["canvas"].create_text(root.winfo_width() // 2, 20, anchor="n", text="2048",
                                font=tkinter.font.Font(family="Roboto",
                                                       size=int(root.winfo_height() * 0.25), weight="bold"),
@@ -967,19 +1031,9 @@ def Menu(root: tkinter.Tk):
     # Button to load the game
     BetterButton(self["canvas"], point[0], point[1] + 180, "Charger",
                  anchor="n",
-                 size=(400, 80), command=lambda: verify_load(root), text_color=(255, 255, 255),
+                 size=(400, 80), command=self["verify_load"], text_color=(255, 255, 255),
                  color=(119, 110, 101),
                  hover_color=(150, 140, 130), font=tkinter.font.Font(size=50), border_radius=90)
-
-
-def verify_load(root: tkinter.Tk):
-    data = load()
-    if not data:
-        pass
-    elif data["type"] == "4D":
-        Game4D(root, True, data)
-    elif data["type"] == "simple":
-        Game(root, True, data)
 
 
 def Game(root: tkinter.Tk, isload: bool, data=None):
@@ -999,7 +1053,7 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
     self["canvas"].create_text(root.winfo_width() // 2, 20, anchor="n", text="2048", font='Helvetica 80 bold',
                                fill="#776e65")
     BetterButton(self["canvas"], int(root.winfo_width() // 1.2), root.winfo_height() // 2, "Menu", anchor="n",
-                 size=(200, 50), command=lambda: Menu(root), text_color=(255, 255, 255), color=(119, 110, 101),
+                 size=(200, 50), command=self["frame"].grid_forget, text_color=(255, 255, 255), color=(119, 110, 101),
                  hover_color=(150, 140, 130))
     point = int(root.winfo_width() // 1.2), int(root.winfo_height() // 2)
     BetterButton(self["canvas"], point[0], point[1] + 60, "Quitter", anchor="n",
@@ -1183,9 +1237,9 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
 
     self["text_color"] = {2: "#776e65", 4: "#776e65", 8: "#776e65", 16: "#776e65", 32: "#776e65", 64: "#776e65",
                           128: "#776e65",
-                            256: "#776e65", 512: "#776e65", 1024: "#776e65", 2048: "#776e65", 4096: "#f9f6f2",
-                            8192: "#f9f6f2",
-                            16384: "#f9f6f2", 32768: "#f9f6f2", 65536: "#f9f6f2", 131072: "#f9f6f2"}
+                          256: "#776e65", 512: "#776e65", 1024: "#776e65", 2048: "#776e65", 4096: "#f9f6f2",
+                          8192: "#f9f6f2",
+                          16384: "#f9f6f2", 32768: "#f9f6f2", 65536: "#f9f6f2", 131072: "#f9f6f2"}
     # button for ai
     BetterButton(self["canvas"], point[0], point[1] + 180, "AI",
                  anchor="n",
@@ -1291,7 +1345,7 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None) -> None:
 
     # Buttons to go back to main menu and to quit
     BetterButton(self["canvas"], int(root.winfo_width() // 1.2), root.winfo_height() // 2, "Menu", anchor="n",
-                 size=(200, 50), command=lambda: Menu(root), text_color=(255, 255, 255), color=(119, 110, 101),
+                 size=(200, 50), command=self["frame"].grid_forget, text_color=(255, 255, 255), color=(119, 110, 101),
                  hover_color=(150, 140, 130))
     point = int(root.winfo_width() // 1.2), int(root.winfo_height() // 2)
     BetterButton(self["canvas"], point[0], point[1] + 60, "Quitter", anchor="n",
@@ -1308,7 +1362,7 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None) -> None:
     icon_button_size = 50
     icon_button_padding = 20
     left_padding = 0.5 * (
-                center - (2 * self["size"] + 2.5 * self["padding"])) - icon_button_size * 1.5 - icon_button_padding
+            center - (2 * self["size"] + 2.5 * self["padding"])) - icon_button_size * 1.5 - icon_button_padding
     pos_y = int(
         self["height"] + 3 * self["size"] + 3.5 * self["padding"] + 0.5 * icon_button_size + 1 * icon_button_padding)
     IconButton(self["canvas"], int(left_padding + icon_button_padding + icon_button_size), pos_y,
@@ -1370,9 +1424,10 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None) -> None:
 
     self["text_color"] = {2: "#776e65", 4: "#776e65", 8: "#776e65", 16: "#776e65", 32: "#776e65", 64: "#776e65",
                           128: "#776e65",
-                            256: "#776e65", 512: "#776e65", 1024: "#776e65", 2048: "#776e65", 4096: "#f9f6f2",
-                            8192: "#f9f6f2",
-                            16384: "#f9f6f2", 32768: "#f9f6f2", 65536: "#f9f6f2", 131072: "#f9f6f2"}
+                          256: "#776e65", 512: "#776e65", 1024: "#776e65", 2048: "#776e65", 4096: "#f9f6f2",
+                          8192: "#f9f6f2",
+                          16384: "#f9f6f2", 32768: "#f9f6f2", 65536: "#f9f6f2", 131072: "#f9f6f2"}
+
     # show the tiles when the game starts
     # update the tiles with the right color and text when the matrix change
     # update the tiles with the new matrix
@@ -1404,7 +1459,8 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None) -> None:
                                                                             .font.Font(size=40,
                                                                                        family="Helvetica",
                                                                                        weight=tkinter.font.BOLD),
-                                                                            fill=self["text_color"][self["grid"]["matrix"][i][j][k]])
+                                                                            fill=self["text_color"][
+                                                                                self["grid"]["matrix"][i][j][k]])
                     current_x += self["padding"] + self["size"]
                 current_x -= 2 * self["padding"] + 2 * self["size"]
                 current_y += self["size"] + self["padding"]
