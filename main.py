@@ -125,6 +125,61 @@ def save(matrix: list, matrix_type: str, score: int):
         json.dump(data, f)
 
 
+def show_message_box(root: tkinter.Tk, canvas: tkinter.Canvas, title: str, message: str) -> None:
+    """
+    Show a message box
+    :param root: the root of the window
+    :param canvas: the canvas of the window
+    :param title: the title of the message box
+    :param message: the message of the message box
+    :return:
+    """
+    frame_width = 0.5
+    frame_height = 0.5
+    frame_padding = 20
+
+    elements = [ImageTk.PhotoImage(
+        Image.new("RGBA", (root.winfo_width(), root.winfo_height()), (0, 0, 0, 200)))]
+
+    def destroy():
+        for element in elements:
+            canvas.delete(element)
+        canvas.delete(continue_button["button"])
+        canvas.delete(continue_button["text_canvas"])
+
+    elements.append(canvas.create_image(0, 0, image=elements[0], anchor="nw"), )
+    elements.append(round_rectangle(canvas,
+                                    int(root.winfo_width() // 2 - (
+                                            root.winfo_width() * frame_width // 2)),
+                                    int(root.winfo_height() // 2 - (
+                                            root.winfo_height() * frame_height // 2)),
+                                    int(root.winfo_width() // 2 + (
+                                            root.winfo_width() * frame_width // 2)),
+                                    int(root.winfo_height() // 2 + (
+                                            root.winfo_height() * frame_height // 2)),
+                                    fill="#bbada0")),
+    elements.append(canvas.create_text(root.winfo_width() // 2,
+                                       int(root.winfo_height() // 2 - (
+                                               root.winfo_height() * frame_height // 2) +
+                                           frame_padding),
+                                       text=title,
+                                       font=tkinter.font.Font(family="Roboto", size=50, weight="bold"),
+                                       fill="#000000", anchor="n"))
+
+    continue_button = BetterButton(canvas, root.winfo_width() // 2,
+                                   int(root.winfo_height() // 2 + (
+                                           root.winfo_height() * frame_height // 2)) - frame_padding,
+                                   text="Continuer", anchor="s", font=tkinter.font.Font(family="Roboto", size=20),
+                                   command=destroy, text_color=(255, 255, 255), color=(119, 110, 101),
+                                   hover_color=(150, 140, 130), border_radius=60)
+
+    elements.append(canvas.create_text(root.winfo_width() // 2,
+                                       root.winfo_height() // 2,
+                                       text=message,
+                                       font=tkinter.font.Font(family="Roboto", size=20),
+                                       fill="#000000", anchor="n", justify="center"))
+
+
 def SimpleGrid() -> dict:
     """
     Fonction regroupant toutes les fonctions invisibles à la grille de jeu simple.
@@ -948,67 +1003,18 @@ def Menu(root: tkinter.Tk):
     self["canvas"].pack()
     self["grid"] = SimpleGrid()
 
-    def show_message_box(title: str, message: str) -> None:
-        """
-        Show a message box
-        :param title: the title of the message box
-        :param message: the message of the message box
-        :return:
-        """
-        frame_width = 0.5
-        frame_height = 0.5
-        frame_padding = 20
-
-        elements = []
-        self["message_box_back"] = ImageTk.PhotoImage(
-            Image.new("RGBA", (root.winfo_width(), root.winfo_height()), (0, 0, 0, 200)))
-        elements.append(self["canvas"].create_image(0, 0, image=self["message_box_back"], anchor="nw"))
-        elements.append(round_rectangle(self["canvas"],
-                                        int(root.winfo_width() // 2 - (root.winfo_width() * frame_width // 2)),
-                                        int(root.winfo_height() // 2 - (root.winfo_height() * frame_height // 2)),
-                                        int(root.winfo_width() // 2 + (root.winfo_width() * frame_width // 2)),
-                                        int(root.winfo_height() // 2 + (root.winfo_height() * frame_height // 2)),
-                                        fill="#bbada0"))
-
-        elements.append(self["canvas"].create_text(root.winfo_width() // 2,
-                                                   int(root.winfo_height() // 2 - (
-                                                               root.winfo_height() * frame_height // 2) +
-                                                       frame_padding),
-                                                   text=title,
-                                                   font=tkinter.font.Font(family="Roboto", size=50, weight="bold"),
-                                                   fill="#000000", anchor="n"))
-
-        def destroy():
-            for element in elements:
-                self["canvas"].delete(element)
-            self["canvas"].delete(continue_button["button"])
-            self["canvas"].delete(continue_button["text_canvas"])
-
-        continue_button = BetterButton(self["canvas"], root.winfo_width() // 2,
-                                       int(root.winfo_height() // 2 + (
-                                                   root.winfo_height() * frame_height // 2)) - frame_padding,
-                                       text="Continuer", anchor="s", font=tkinter.font.Font(family="Roboto", size=20),
-                                       command=destroy, text_color=(255, 255, 255), color=(119, 110, 101),
-                                       hover_color=(150, 140, 130), border_radius=60)
-
-        elements.append(self["canvas"].create_text(root.winfo_width() // 2,
-                                                   root.winfo_height() // 2,
-                                                   text=message,
-                                                   font=tkinter.font.Font(family="Roboto", size=20),
-                                                   fill="#000000", anchor="n", justify="center"))
-
     def verify_load():
         data = load()
         if not data:
-            show_message_box("Oups",
-                             "Une erreur est survenue lors du chargement de la partie.\nAvez vous chargé le bon fichier ?")
+            show_message_box(root=root, canvas=self["canvas"], title="Oups",
+                             message="Une erreur est survenue"
+                                     " lors du chargement de la partie.\nAvez vous chargé le bon fichier ?")
             return
         elif data["type"] == "4D":
             Game4D(root, True, data)
         elif data["type"] == "simple":
             Game(root, True, data)
 
-    self["show_message_box"] = show_message_box
     self["verify_load"] = verify_load
 
     self["canvas"].create_text(root.winfo_width() // 2, 20, anchor="n", text="2048",
@@ -1204,12 +1210,15 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
             self["guard_rail"] = False
             return
         frame = int(((time.time() - begin) * 1000) / duration * frames_length)
-        self["canvas"].moveto(self["tiles"][start[0]][start[1]],
-                              frames[frame][0] + start_coords[0] - 12,
-                              frames[frame][1] + start_coords[1], )
-        self["canvas"].coords(self["texts"][start[0]][start[1]],
-                              frames[frame][0] + text_start_coords[0],
-                              frames[frame][1] + text_start_coords[1])
+        try:
+            self["canvas"].moveto(self["tiles"][start[0]][start[1]],
+                                  frames[frame][0] + start_coords[0] - 12,
+                                  frames[frame][1] + start_coords[1], )
+            self["canvas"].coords(self["texts"][start[0]][start[1]],
+                                  frames[frame][0] + text_start_coords[0],
+                                  frames[frame][1] + text_start_coords[1])
+        except IndexError:
+            pass
 
     # make tiles move with Grid()
     # get the move() function from Grid()
@@ -1223,6 +1232,7 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
 
     if isload:
         self["grid"]["matrix"] = data["matrix"]
+        self["grid"]["score"] = data["score"]
     else:
         self["grid"]["start"](self["grid"])
 
