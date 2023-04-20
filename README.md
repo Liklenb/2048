@@ -32,14 +32,3 @@ Après avoir cliqué sur l'un des 3 boutons (Classique, 4D ou Charger), l'interf
 Lorsque la partie est perdue, on ne peut plus jouer et l'interface de la grille devient sombre. Un message s'affiche : "Vous avez perdu !"
 
 Enfin, la fenêtre a un logo.
-
-## Interface du jeu
-
-- Menu principale :
-  > ![menu.png](menu.png)
-- Jeu classique 
-  > ![classique.png](classique.png)
-- Jeu 4D
-  > ![quatred.png](quatred.png)
-
-  
