@@ -1344,6 +1344,7 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None) -> None:
     self["grid"] = Grid4D()
     if isload:
         self["grid"]["matrix"] = data["matrix"]
+        self["grid"]["score"] = data["score"]
     else:
         self["grid"]["start"](self["grid"])
 
