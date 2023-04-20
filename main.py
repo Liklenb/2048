@@ -988,6 +988,8 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
                 move_data = self["grid"]["ai"](self["grid"])
                 animation_duration = 100
 
+                self["canvas"].itemconfig(self["score"], text=self["grid"]["score"])
+
                 for movement in move_data["mouvement"]:
                     self["animation"](self, movement["from"], movement["to"], animation_duration, fps=144,
                                       function=lambda x: -(math.cos(math.pi * x) - 1) / 2)
