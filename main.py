@@ -937,7 +937,11 @@ def IconButton(canvas: tkinter.Canvas,
 
 # making the menu
 def Menu(root: tkinter.Tk):
-    """Fait une fenetre Menu grâce à Tkinter."""
+    """
+    Create the menu window
+    :param root: the tkinter window
+    :return: The Menu Object
+    """
     self = {"frame": tkinter.Frame(root)}
     self["frame"].grid(row=0, column=0)
     self["canvas"] = tkinter.Canvas(self["frame"], width=root.winfo_width(), height=root.winfo_height(), bg="#a39489")
@@ -980,7 +984,11 @@ def verify_load(root: tkinter.Tk):
 
 def Game(root: tkinter.Tk, isload: bool, data=None):
     """
-    Fait une fenetre de jeu grâce à Tkinter.
+    Creates a game window
+    :param root: The tkinter window
+    :param isload: Whenever the game is loaded from a save or not
+    :param data: grid to load if isload is True
+    :return: The Game Object
     """
     self = {
         "frame": tkinter.Frame(root),
@@ -1057,7 +1065,11 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
     # update the tiles with the right color and text when the matrix change
     # update the tiles with the new matrix
     def update(self):
-        """Met à jour les tuiles avec la nouvelle matrice en supprimant l'ancienne."""
+        """
+        creates the tiles on the grid using the matrix
+        :param self: The Game Object
+        :return: None
+        """
         for i in range(4):
             for j in range(4):
                 self["canvas"].delete(self["tiles"][i][j])
@@ -1365,7 +1377,11 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None) -> None:
     # update the tiles with the right color and text when the matrix change
     # update the tiles with the new matrix
     def update(self):
-        """Fonction qui place les tuiles sur la grille 4D."""
+        """
+        Creates the tiles on the 4D grid
+        :param self: the object
+        :return: none
+        """
         current_x = center - 2 * self["padding"] - 2 * self["size"]
         current_y = self["height"] + self["padding"]
         for i in range(4):
