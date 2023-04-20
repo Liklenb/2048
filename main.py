@@ -35,7 +35,7 @@ def load():
             return False
 
     # On vérifie que type et matrix sont présents.
-    if "type" not in info and "matrix" not in info:
+    if "type" not in info and "matrix" not in info and "score" not in info:
         return False
 
     # On vérifie que la partie sauvegardée est valide.
