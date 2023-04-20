@@ -222,19 +222,6 @@ def SimpleGrid() -> dict:
 
             self["score"] += self["matrix"][x][y]
 
-    def check_win(self: dict) -> bool:
-        """
-        Vérifie si la partie est gagnée.
-        :param dict self: Dictionnaire contenant la grille de jeu.
-        :return bool: True si la partie est gagnée, False sinon.
-        """
-
-        for row in self["matrix"]:
-            for elem in row:
-                if elem == 2048:
-                    return True
-        return False
-
     def check_lose(self: dict, empty_tiles: list) -> bool:
         """
         Vérifie si on peut faire un mouvement dans la direction donnée.
@@ -440,7 +427,6 @@ def SimpleGrid() -> dict:
         "score": 0,
         "start": start,
         "move": move,
-        "check_win": check_win,
         "check_lose": check_lose,
         "get_empty_tiles": get_empty_tiles,
         "ai": ai
@@ -497,20 +483,6 @@ def Grid4D():
 
             self["score"] += self["matrix"][x][y][z]
 
-    def check_win(self: dict) -> bool:
-        """
-        Vérifie si la partie est gagnée.
-        :param dict self: Dictionnaire contenant la grille de jeu.
-        :return bool: True si la partie est gagnée, False sinon.
-        """
-
-        for x in self["matrix"]:
-            for y in x:
-                for elem in y:
-                    if elem == 2048:
-                        return True
-        return False
-
     def check_lose(self: dict, empty_tiles: list) -> bool:
         """
         Vérifie si on peut faire un mouvement dans la direction donnée.
@@ -551,11 +523,7 @@ def Grid4D():
             "fusion": [],
         }
 
-        empty_tiles = get_empty_tiles(self)
-
-        if check_win(self):
-            return data
-        elif check_lose(self, empty_tiles):
+        if check_lose(self, get_empty_tiles(self)):
             return data
 
         pos = []
@@ -640,7 +608,6 @@ def Grid4D():
         "score": 0,
         "start": start,
         "move": move,
-        "check_win": check_win,
         "check_lose": check_lose,
         "get_empty_tiles": get_empty_tiles
     }
