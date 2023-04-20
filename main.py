@@ -998,7 +998,7 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
                  hover_color=(150, 140, 130))
     # Button to save the game
     BetterButton(self["canvas"], point[0], point[1] + 120, "Sauvegarder",
-                 command=lambda: save(self["grid"]["matrix"], "simple"),
+                 command=lambda: save(self["grid"]["matrix"], "simple", self["grid"]["score"]),
                  size=(200, 50), anchor="n", text_color=(255, 255, 255), color=(119, 110, 101),
                  hover_color=(150, 140, 130))
 
@@ -1285,7 +1285,7 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None) -> None:
                  hover_color=(150, 140, 130))
     # Button to save the game
     BetterButton(self["canvas"], point[0], point[1] + 120, "Sauvegarder",
-                 command=lambda: save(self["grid"]["matrix"], "4D"),
+                 command=lambda: save(self["grid"]["matrix"], "4D", self["grid"]["score"]),
                  size=(200, 50), anchor="n", text_color=(255, 255, 255), color=(119, 110, 101),
                  hover_color=(150, 140, 130))
     # create empty tiles for the grid
