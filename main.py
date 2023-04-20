@@ -44,33 +44,50 @@ def load():
         return False
 
     if info["type"] == "4D":
+        score_verify = 0
 
         for x in range(4):
+
+            if len(info["matrix"] != 2):
+                return False
+
             for y in range(2):
 
-                try:
-                    if len(info["matrix"][x][y]) != 2:
-                        return False
-                    for z in range(2):
-                        if info["matrix"][x][y][z] not in [0, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048]:
-                            return False
-                except IndexError:
+                if len(info["matrix"][x][y]) != 2:
                     return False
 
-        data = {"type": "4D", "matrix": info["matrix"]}
+                for z in range(2):
+                    if info["matrix"][x][y][z] not in [0, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048]:
+                        return False
+
+                    score_verify += info["matrix"][x][y][z]
+
+        if score_verify != info["score"]:
+            return False
+
+        data = {"type": "4D", "matrix": info["matrix"], "score": info["score"]}
 
         return data
 
     elif info["type"] == "simple":
+        score_verify = 0
 
         for x in range(4):
+
             if len(info["matrix"][x]) != 4:
                 return False
+
             for y in range(4):
+
                 if info["matrix"][x][y] not in [0, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048]:
                     return False
 
-        data = {"type": "simple", "matrix": info["matrix"]}
+                score_verify += info["matrix"][x][y]
+
+        if score_verify != info["score"]:
+            return False
+
+        data = {"type": "simple", "matrix": info["matrix"], "score": info["score"]}
 
         return data
 
@@ -78,18 +95,20 @@ def load():
         return False
 
 
-def save(matrix: list, matrix_type: str):
+def save(matrix: list, matrix_type: str, score: int):
     """
     Sauvegarde la partie en cours.
     :param list matrix: Liste contenant la grille de jeu.
     :param str matrix_type: Type de jeu.
+    :param int score: Score du jeu.
     :return bool: False si l'utilisateur annule la sauvegarde.
     """
 
     # On crée un dictionnaire qui va nous permettre de stocker les informations de la partie.
     data = {
         "type": f"{matrix_type}",
-        "matrix": matrix
+        "matrix": matrix,
+        "score": score
     }
 
     # On ouvre l'explorateur de fichier.
