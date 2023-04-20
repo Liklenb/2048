@@ -46,22 +46,21 @@ def load():
         score_verify = 0
 
         for x in range(4):
-
-            if len(info["matrix"]) != 2:
-                return False
-
             for y in range(2):
 
                 if len(info["matrix"][x][y]) != 2:
+                    print("wat2")
                     return False
 
                 for z in range(2):
                     if info["matrix"][x][y][z] not in [0, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048]:
+                        print("wat3")
                         return False
 
                     score_verify += info["matrix"][x][y][z]
 
         if score_verify != info["score"]:
+            print("wat4")
             return False
 
         data = {"type": "4D", "matrix": info["matrix"], "score": info["score"]}
@@ -72,10 +71,6 @@ def load():
         score_verify = 0
 
         for x in range(4):
-
-            if len(info["matrix"][x]) != 4:
-                return False
-
             for y in range(4):
 
                 if info["matrix"][x][y] not in [0, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384,
