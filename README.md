@@ -4,9 +4,9 @@
 
 ### Étudiants :
 
-- Alexandre François
-- Baptiste Boisserie
-- Arthur Borges
+- [Alexandre François](https://github.com/uvsq22201695)
+- [Baptiste Boisserie](https://github.com/Liklenb)
+- [Arthur Borges](https://github.com/arthB23)
 
 ### Dépôt du projet GitHub :
 
