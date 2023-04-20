@@ -47,7 +47,7 @@ def load():
 
         for x in range(4):
 
-            if len(info["matrix"] != 2):
+            if len(info["matrix"]) != 2:
                 return False
 
             for y in range(2):
