@@ -9,6 +9,7 @@ from random import randint, random
 from tkinter.filedialog import asksaveasfile, askopenfile
 from datetime import datetime
 import json
+import os
 
 
 def load():
@@ -118,6 +119,61 @@ def save(matrix: list, matrix_type: str, score: int):
     # On sauvegarde les informations de la partie.
     with open(file.name, "w") as f:
         json.dump(data, f)
+
+
+def load_config() -> dict:
+    # check if config file exist
+    if not os.path.exists("config.json"):
+        # create config file
+        with open("config.json", "w") as f:
+            json.dump({
+                "tile_colors":
+                    {
+                        2: "#eee4da",
+                        4: "#ede0c8",
+                        8: "#f2b179",
+                        16: "#f59563",
+                        32: "#f67c5f",
+                        64: "#f65e3b",
+                        128: "#edcf72",
+                        256: "#edcc61",
+                        512: "#edc850",
+                        1024: "#edc53f",
+                        2048: "#edc22e",
+                        4096: "#3c3a32",
+                        8192: "#3c3a32",
+                        16384: "#3c3a32",
+                        32768: "#3c3a32",
+                        65536: "#3c3a32",
+                        131072: "#3c3a32"
+                    },
+                "tile_text_colors":
+                    {
+                        2: "#776e65",
+                        4: "#776e65",
+                        8: "#776e65",
+                        16: "#776e65",
+                        32: "#776e65",
+                        64: "#776e65",
+                        128: "#776e65",
+                        256: "#776e65",
+                        512: "#776e65",
+                        1024: "#776e65",
+                        2048: "#776e65",
+                        4096: "#f9f6f2",
+                        8192: "#f9f6f2",
+                        16384: "#f9f6f2",
+                        32768: "#f9f6f2",
+                        65536: "#f9f6f2",
+                        131072: "#f9f6f2"
+                    },
+                "animation_duration": 100,
+                "animation_fps": 60,
+            }, f, indent=4)
+    # load config file
+    with open("config.json", "r") as f:
+        config = json.load(f)
+    return config
 
 
 def show_message_box(root: tkinter.Tk, canvas: tkinter.Canvas, title: str, message: str) -> None:
@@ -622,6 +678,38 @@ def rgb_to_tkinter(rgb: tuple[int, int, int]):
     return f'#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}'
 
 
+def get_anchor_position(x: int, y: int, size: tuple[int, int], anchor: str) -> tuple[int, int]:
+    """
+    Transpose the position from the given anchor to the nw anchor
+    :param x: the x position at the given anchor
+    :param y: the y position at the given anchor
+    :param size: the size of the object
+    :param anchor: the given anchor
+    :return: the x and y position at the nw anchor
+    """
+    if anchor == "center":
+        x -= size[0] / 2
+        y -= size[1] / 2
+    elif anchor == "ne":
+        x -= size[0]
+    elif anchor == "se":
+        x -= size[0]
+        y -= size[1]
+    elif anchor == "sw":
+        y -= size[1]
+    elif anchor == "e":
+        x -= size[0]
+        y -= size[1] / 2
+    elif anchor == "w":
+        y -= size[1] / 2
+    elif anchor == "n":
+        x -= size[0] / 2
+    elif anchor == "s":
+        x -= size[0] / 2
+        y -= size[1]
+    return x, y
+
+
 # create a round rectangle
 def round_rectangle(canvas: tkinter.Canvas, x1: int, y1: int, x2: int, y2: int, radius: int = 25, **kwargs) -> int:
     """
@@ -727,36 +815,6 @@ def BetterButton(canvas: tkinter.Canvas,
         if self["hover"]:
             self["command"]()
 
-    def get_anchor_position(self: dict, x: int, y: int) -> tuple[int, int]:
-        """
-        Transpose the position from the given anchor to the nw anchor
-        :param self: the button
-        :param x: the x position at the given anchor
-        :param y: the y position at the given anchor
-        :return: the x and y position at the nw anchor
-        """
-        if self["anchor"] == "center":
-            x -= self["size"][0] / 2
-            y -= self["size"][1] / 2
-        elif self["anchor"] == "ne":
-            x -= self["size"][0]
-        elif self["anchor"] == "se":
-            x -= self["size"][0]
-            y -= self["size"][1]
-        elif self["anchor"] == "sw":
-            y -= self["size"][1]
-        elif self["anchor"] == "e":
-            x -= self["size"][0]
-            y -= self["size"][1] / 2
-        elif self["anchor"] == "w":
-            y -= self["size"][1] / 2
-        elif self["anchor"] == "n":
-            x -= self["size"][0] / 2
-        elif self["anchor"] == "s":
-            x -= self["size"][0] / 2
-            y -= self["size"][1]
-        return x, y
-
     def build(self: dict) -> None:
         """
         Build the button on the canvas
@@ -796,7 +854,6 @@ def BetterButton(canvas: tkinter.Canvas,
     self["hover_on"] = hover_on
     self["hover_off"] = hover_off
     self["click"] = click
-    self["get_anchor_position"] = get_anchor_position
     self["build"] = build
 
     # get the text size
@@ -809,7 +866,7 @@ def BetterButton(canvas: tkinter.Canvas,
         self["padding"] = size[0] - self["text_size"][0], size[1] - self["text_size"][1]
     self["size"] = self["text_size"][0] + self["padding"][0], self["text_size"][1] + self["padding"][1]
     # get the position of the button with nw anchor
-    self["x"], self["y"] = self["get_anchor_position"](self, self["x"], self["y"])
+    self["x"], self["y"] = get_anchor_position(self["x"], self["y"], self["size"], self["anchor"])
     # build the button
     self["build"](self)
 
@@ -824,7 +881,6 @@ def IconButton(canvas: tkinter.Canvas,
                hover_icon: str = None,
                command=lambda: None,
                size: tuple[int, int] = None,
-               border_radius: int = 50,
                anchor: str = "nw", ):
     """
     Create an icon button
@@ -835,15 +891,13 @@ def IconButton(canvas: tkinter.Canvas,
     :param hover_icon: the path of the icon when the mouse is over the button
     :param command: the command of the button
     :param size: the size of the button (if not specified, the size of the icon will be used)
-    :param border_radius: the border radius of the button
     :param anchor: the anchor of the button
     :return: the button
     """
 
     # define the default values
     self = {"canvas": canvas, "x": x, "y": y, "icon": icon,
-            "hover_icon": hover_icon, "command": command, "hover": False,
-            "border_radius": border_radius, "anchor": anchor, "size": size}
+            "hover_icon": hover_icon, "command": command, "hover": False, "anchor": anchor, "size": size}
 
     def hover_on(self: dict) -> None:
         """
@@ -874,36 +928,6 @@ def IconButton(canvas: tkinter.Canvas,
         if self["hover"]:
             self["command"]()
 
-    def get_anchor_position(self: dict, x: int, y: int) -> tuple[int, int]:
-        """
-        Transpose the position from the given anchor to the nw anchor
-        :param self: the button
-        :param x: the x position at the given anchor
-        :param y: the y position at the given anchor
-        :return: the x and y position at the nw anchor
-        """
-        if self["anchor"] == "center":
-            x -= self["size"][0] / 2
-            y -= self["size"][1] / 2
-        elif self["anchor"] == "ne":
-            x -= self["size"][0]
-        elif self["anchor"] == "se":
-            x -= self["size"][0]
-            y -= self["size"][1]
-        elif self["anchor"] == "sw":
-            y -= self["size"][1]
-        elif self["anchor"] == "e":
-            x -= self["size"][0]
-            y -= self["size"][1] / 2
-        elif self["anchor"] == "w":
-            y -= self["size"][1] / 2
-        elif self["anchor"] == "n":
-            x -= self["size"][0] / 2
-        elif self["anchor"] == "s":
-            x -= self["size"][0] / 2
-            y -= self["size"][1]
-        return x, y
-
     def build(self: dict) -> None:
         """
         Build the button
@@ -927,7 +951,6 @@ def IconButton(canvas: tkinter.Canvas,
     self["hover_on"] = hover_on
     self["hover_off"] = hover_off
     self["click"] = click
-    self["get_anchor_position"] = get_anchor_position
     self["build"] = build
 
     # load the icon
@@ -941,7 +964,7 @@ def IconButton(canvas: tkinter.Canvas,
         # get the size of the icon
         self["size"] = self["texture"].size
     # get the position of the button with nw anchor
-    self["x"], self["y"] = self["get_anchor_position"](self, self["x"], self["y"])
+    self["x"], self["y"] = get_anchor_position(self["x"], self["y"], self["size"], self["anchor"])
     # resize the icons
     self["textureTk"] = ImageTk.PhotoImage(self["texture"].resize(self["size"]))
     self["hover_textureTk"] = ImageTk.PhotoImage(self["hover_texture"].resize(self["size"]))
@@ -964,6 +987,7 @@ def Menu(root: tkinter.Tk):
     self["canvas"] = tkinter.Canvas(self["frame"], width=root.winfo_width(), height=root.winfo_height(), bg="#a39489")
     self["canvas"].pack()
     self["grid"] = SimpleGrid()
+    self["config"] = load_config()
 
     def verify_load():
         data = load()
@@ -973,9 +997,9 @@ def Menu(root: tkinter.Tk):
                                      " lors du chargement de la partie.\nAvez vous chargé le bon fichier ?")
             return
         elif data["type"] == "4D":
-            Game4D(root, True, data)
+            Game4D(root=root, isload=True, data=data, config=self["config"])
         elif data["type"] == "simple":
-            Game(root, True, data)
+            Game(root=root, isload=True, data=data, config=self["config"])
 
     self["verify_load"] = verify_load
 
@@ -985,11 +1009,11 @@ def Menu(root: tkinter.Tk):
                                fill="#776e65")
     point = int(root.winfo_width() // 2), int(root.winfo_height() // 2.35)
     BetterButton(self["canvas"], point[0], point[1], "Classique", anchor="n",
-                 size=(400, 80), command=lambda: Game(root, False, ), text_color=(255, 255, 255), color=(119, 110, 101),
+                 size=(400, 80), command=lambda: Game(root, False, self["config"]), text_color=(255, 255, 255), color=(119, 110, 101),
                  hover_color=(150, 140, 130), font=tkinter.font.Font(size=50), border_radius=90)
     BetterButton(self["canvas"], point[0], point[1] + 90, "4D",
                  size=(400, 80),
-                 anchor="n", command=lambda: Game4D(root, False),
+                 anchor="n", command=lambda: Game4D(root, False, self["config"]),
                  text_color=(255, 255, 255), color=(119, 110, 101), hover_color=(150, 140, 130),
                  font=tkinter.font.Font(size=50), border_radius=90)
     BetterButton(self["canvas"], point[0], point[1] + 270, "Quitter",
@@ -1004,16 +1028,18 @@ def Menu(root: tkinter.Tk):
                  hover_color=(150, 140, 130), font=tkinter.font.Font(size=50), border_radius=90)
 
 
-def Game(root: tkinter.Tk, isload: bool, data=None):
+def Game(root: tkinter.Tk, isload: bool, config:dict, data=None):
     """
     Creates a game window
     :param root: The tkinter window
     :param isload: Whenever the game is loaded from a save or not
+    :param config: The config of the game
     :param data: grid to load if isload is True
     :return: The Game Object
     """
     self = {
         "frame": tkinter.Frame(root),
+        "config": config
     }
     self["frame"].grid(row=0, column=0)
     self["canvas"] = tkinter.Canvas(self["frame"], width=root.winfo_width(), height=root.winfo_height(), bg="#F3E6E4")
@@ -1082,7 +1108,7 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
                                         self["size"] + self["padding"]) + self["size"]),
                             self["height"] + j * (self["size"] + self["padding"]) + self["size"] +
                             self["padding"],
-                            fill="#cdc1b4", outline="#cdc1b4", radius=10)
+                            fill="#cdc1b4", radius=10)
 
     # update the tiles with the right color and text when the matrix change
     # update the tiles with the new matrix
@@ -1110,15 +1136,14 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
                                                           self["height"] + j * (self["size"] + self["padding"]) +
                                                           self["size"] +
                                                           self["padding"],
-                                                          fill=self["color"][self["grid"]["matrix"][i][j]],
-                                                          outline=self["color"][self["grid"]["matrix"][i][j]],
+                                                          fill=self["config"]["tile_colors"][str(self["grid"]["matrix"][i][j])],
                                                           radius=10)
                     self["texts"][i][j] = self["canvas"].create_text(
                         int(center - (1.5 * self["padding"] + 2 * self["size"]) + i * (self["size"] + self["padding"]) +
                             self["size"] // 2),
                         self["height"] + j * (self["size"] + self["padding"]) + self["padding"] + self["size"] // 2,
                         text=self["grid"]["matrix"][i][j], font='Helvetica 40 bold',
-                        fill=self["text_color"][self["grid"]["matrix"][i][j]])
+                        fill=self["config"]["tile_text_colors"][str(self["grid"]["matrix"][i][j])])
 
         # if the player lose we show a black background with a text
         if self["grid"]["check_lose"](self["grid"], self["grid"]["get_empty_tiles"](self["grid"])):
@@ -1200,18 +1225,6 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
 
     self["animating"] = False
 
-    # Color of the tiles.
-    self["color"] = {2: "#eee4da", 4: "#ede0c8", 8: "#f2b179", 16: "#f59563", 32: "#f67c5f", 64: "#f65e3b",
-                     128: "#edcf72",
-                     256: "#edcc61", 512: "#edc850", 1024: "#edc53f", 2048: "#edc22e", 4096: "#3c3a32",
-                     8192: "#3c3a32",
-                     16384: "#3c3a32", 32768: "#3c3a32", 65536: "#3c3a32", 131072: "#3c3a32"}
-
-    self["text_color"] = {2: "#776e65", 4: "#776e65", 8: "#776e65", 16: "#776e65", 32: "#776e65", 64: "#776e65",
-                          128: "#776e65",
-                          256: "#776e65", 512: "#776e65", 1024: "#776e65", 2048: "#776e65", 4096: "#f9f6f2",
-                          8192: "#f9f6f2",
-                          16384: "#f9f6f2", 32768: "#f9f6f2", 65536: "#f9f6f2", 131072: "#f9f6f2"}
     # button for ai
     BetterButton(self["canvas"], point[0], point[1] + 180, "AI",
                  anchor="n",
@@ -1234,15 +1247,16 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
         """Fonction qui fait bouger les tuiles et qui met à jour le score."""
         if self["guard_rail"]:
             return
-        animation_duration = 100
         move_data = self["grid"]["move"](self["grid"], direction)
         if not (len(move_data["mouvement"]) == 0 and len(move_data["fusion"]) == 0):
             self["guard_rail"] = True
         for movement in move_data["mouvement"]:
-            self["animation"](self, movement["from"], movement["to"], animation_duration, fps=144,
+            self["animation"](self, movement["from"], movement["to"], self["config"]["animation_duration"],
+                              fps=self["config"]["animation_fps"],
                               function=lambda x: -(math.cos(math.pi * x) - 1) / 2)
         for fusion in move_data["fusion"]:
-            self["animation"](self, fusion["from"], fusion["to"], animation_duration, fps=144,
+            self["animation"](self, fusion["from"], fusion["to"], self["config"]["animation_duration"],
+                              fps=self["config"]["animation_fps"],
                               function=lambda x: -(math.cos(math.pi * x) - 1) / 2)
 
         # print(direction, self["grid"]["matrix"])
@@ -1286,17 +1300,19 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
 
 
 # making the 2048 4D window
-def Game4D(root: tkinter.Tk, isload: bool, data=None) -> None:
+def Game4D(root: tkinter.Tk, isload: bool, config:dict, data=None) -> None:
     """
     Fonction qui crée la fenêtre du jeu 2048 4D.
     :param root: The tkinter window
     :param isload: Whenever the game is loaded from a save or not
+    :param config: The config file
     :param data: grid to load if isload is True
     :return: The Game4D object
     """
     self = {
         "frame": tkinter.Frame(root),
-        "guard_rail": False
+        "guard_rail": False,
+        "config": config
     }
     self["frame"].grid(row=0, column=0)
     self["canvas"] = tkinter.Canvas(self["frame"], width=root.winfo_width(), height=root.winfo_height(), bg="#F3E6E4")
@@ -1388,18 +1404,6 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None) -> None:
     else:
         self["grid"]["start"](self["grid"])
 
-    # Color of the tiles. Same as the normal game.
-    self["color"] = {0: "#cdc1b4", 2: "#eee4da", 4: "#ede0c8", 8: "#f2b179", 16: "#f59563", 32: "#f67c5f",
-                     64: "#f65e3b",
-                     128: "#edcf72",
-                     256: "#edcc61", 512: "#edc850", 1024: "#edc53f", 2048: "#edc22e"}
-
-    self["text_color"] = {2: "#776e65", 4: "#776e65", 8: "#776e65", 16: "#776e65", 32: "#776e65", 64: "#776e65",
-                          128: "#776e65",
-                          256: "#776e65", 512: "#776e65", 1024: "#776e65", 2048: "#776e65", 4096: "#f9f6f2",
-                          8192: "#f9f6f2",
-                          16384: "#f9f6f2", 32768: "#f9f6f2", 65536: "#f9f6f2", 131072: "#f9f6f2"}
-
     # show the tiles when the game starts
     # update the tiles with the right color and text when the matrix change
     # update the tiles with the new matrix
@@ -1422,7 +1426,9 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None) -> None:
                                                                  current_y,
                                                                  current_x + self["size"],
                                                                  current_y + self["size"],
-                                                                 fill=self["color"][self["grid"]["matrix"][i][j][k]])
+                                                                 fill=self["config"]["tile_colors"
+                                                                                     ""][str(self["grid"]["matrix"
+                                                                                                      ""][i][j][k])])
                         self["texts"][i][j][k] = self["canvas"].create_text(current_x + self["size"] // 2, current_y
                                                                             + self["size"] // 2,
                                                                             text=self["grid"]["matrix"][i][j][k],
@@ -1431,8 +1437,8 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None) -> None:
                                                                             .font.Font(size=40,
                                                                                        family="Helvetica",
                                                                                        weight=tkinter.font.BOLD),
-                                                                            fill=self["text_color"][
-                                                                                self["grid"]["matrix"][i][j][k]])
+                                                                            fill=self["config"]["tile_text_colors"][
+                                                                                str(self["grid"]["matrix"][i][j][k])])
                     current_x += self["padding"] + self["size"]
                 current_x -= 2 * self["padding"] + 2 * self["size"]
                 current_y += self["size"] + self["padding"]
@@ -1503,15 +1509,17 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None) -> None:
         move_data = self["grid"]["move"](self["grid"], direction)
         if move_data["mouvement"] == [] and move_data["fusion"] == []:
             return
-        animation_duration = 100
         self["guard_rail"] = True
         # update the tiles
         for movement in move_data["mouvement"]:
-            self["animation"](self, movement["from"], movement["to"], animation_duration, fps=144,
+            self["animation"](self, movement["from"], movement["to"], self["config"]["animation_duration"],
+                              fps=self["config"]["animation_fps"],
                               function=lambda x: -(math.cos(math.pi * x) - 1) / 2)
         for fusion in move_data["fusion"]:
-            self["animation"](self, fusion["from"], fusion["to"], animation_duration, fps=144,
+            self["animation"](self, fusion["from"], fusion["to"], self["config"]["animation_duration"],
+                              fps=self["config"]["animation_fps"],
                               function=lambda x: -(math.cos(math.pi * x) - 1) / 2)
+        self["canvas"].itemconfig(self["score"], text="Score : " + str(self["grid"]["score"]))
 
     def fade(current_opacity: int):
         self["canvas"].itemconfig(self["lose_fade"], image=self["fade_frames"][current_opacity])
