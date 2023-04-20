@@ -1084,7 +1084,7 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
                             self["size"] // 2),
                         self["height"] + j * (self["size"] + self["padding"]) + self["padding"] + self["size"] // 2,
                         text=self["grid"]["matrix"][i][j], font='Helvetica 40 bold',
-                        fill="#776e65")
+                        fill=self["text_color"][self["grid"]["matrix"][i][j]])
 
         # if the player lose we show a black background with a text
         if self["grid"]["check_lose"](self["grid"], self["grid"]["get_empty_tiles"](self["grid"])):
@@ -1167,12 +1167,13 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
                      128: "#edcf72",
                      256: "#edcc61", 512: "#edc850", 1024: "#edc53f", 2048: "#edc22e", 4096: "#3c3a32",
                      8192: "#3c3a32",
-                     16384: "#3c3a32", 32768: "#3c3a32", 65536: "#3c3a32", 131072: "#3c3a32", 262144: "#3c3a32",
-                     524288: "#3c3a32",
-                     1048576: "#3c3a32", 2097152: "#3c3a32", 4194304: "#3c3a32", 8388608: "#3c3a32",
-                     16777216: "#3c3a32",
-                     33554432: "#3c3a32", 67108864: "#3c3a32", 134217728: "#3c3a32", 268435456: "#3c3a32"}
+                     16384: "#3c3a32", 32768: "#3c3a32", 65536: "#3c3a32", 131072: "#3c3a32"}
 
+    self["text_color"] = {2: "#776e65", 4: "#776e65", 8: "#776e65", 16: "#776e65", 32: "#776e65", 64: "#776e65",
+                          128: "#776e65",
+                            256: "#776e65", 512: "#776e65", 1024: "#776e65", 2048: "#776e65", 4096: "#f9f6f2",
+                            8192: "#f9f6f2",
+                            16384: "#f9f6f2", 32768: "#f9f6f2", 65536: "#f9f6f2", 131072: "#f9f6f2"}
     # button for ai
     BetterButton(self["canvas"], point[0], point[1] + 180, "AI",
                  anchor="n",
@@ -1355,6 +1356,11 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None) -> None:
                      128: "#edcf72",
                      256: "#edcc61", 512: "#edc850", 1024: "#edc53f", 2048: "#edc22e"}
 
+    self["text_color"] = {2: "#776e65", 4: "#776e65", 8: "#776e65", 16: "#776e65", 32: "#776e65", 64: "#776e65",
+                          128: "#776e65",
+                            256: "#776e65", 512: "#776e65", 1024: "#776e65", 2048: "#776e65", 4096: "#f9f6f2",
+                            8192: "#f9f6f2",
+                            16384: "#f9f6f2", 32768: "#f9f6f2", 65536: "#f9f6f2", 131072: "#f9f6f2"}
     # show the tiles when the game starts
     # update the tiles with the right color and text when the matrix change
     # update the tiles with the new matrix
@@ -1382,7 +1388,7 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None) -> None:
                                                                             .font.Font(size=40,
                                                                                        family="Helvetica",
                                                                                        weight=tkinter.font.BOLD),
-                                                                            fill="#776e65")
+                                                                            fill=self["text_color"][self["grid"]["matrix"][i][j][k]])
                     current_x += self["padding"] + self["size"]
                 current_x -= 2 * self["padding"] + 2 * self["size"]
                 current_y += self["size"] + self["padding"]
