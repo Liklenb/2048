@@ -1,4 +1,3 @@
-import os
 import time
 import tkinter.font
 
@@ -1218,17 +1217,17 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
                                     2.5 * self["padding"])) - icon_button_size * 1.5 - icon_button_padding
     pos_y = int(self["height"] + 3 * self["size"] + 3.5 * self["padding"] +
                 0.5 * icon_button_size + 1 * icon_button_padding)
-    IconButton(self["canvas"], left_padding + icon_button_padding + icon_button_size, pos_y,
+    IconButton(self["canvas"], int(left_padding + icon_button_padding + icon_button_size), pos_y,
                "down.png", command=lambda: action(self, "right"), size=(icon_button_size, icon_button_size),
                hover_icon="down_hover.png")
-    IconButton(self["canvas"], 2 * icon_button_size + left_padding + 2 * icon_button_padding,
+    IconButton(self["canvas"], int(2 * icon_button_size + left_padding + 2 * icon_button_padding),
                int(pos_y - icon_button_padding - icon_button_size),
                "right.png", command=lambda: action(self, "down"), size=(icon_button_size, icon_button_size),
                hover_icon="right_hover.png")
-    IconButton(self["canvas"], left_padding, int(pos_y - icon_button_padding - icon_button_size),
+    IconButton(self["canvas"], int(left_padding), int(pos_y - icon_button_padding - icon_button_size),
                "left.png", command=lambda: action(self, "up"), size=(icon_button_size, icon_button_size),
                hover_icon="left_hover.png")
-    IconButton(self["canvas"], left_padding + icon_button_padding + icon_button_size,
+    IconButton(self["canvas"], int(left_padding + icon_button_padding + icon_button_size),
                int(pos_y - 2 * icon_button_padding - 2 * icon_button_size),
                "up.png", command=lambda: action(self, "left"), size=(icon_button_size, icon_button_size),
                hover_icon="up_hover.png")
@@ -1247,7 +1246,7 @@ def Game(root: tkinter.Tk, isload: bool, data=None):
 
 
 # making the 2048 4D window
-def Game4D(root: tkinter.Tk, isload: bool, data=None) -> dict:
+def Game4D(root: tkinter.Tk, isload: bool, data=None) -> None:
     """
     Fonction qui crée la fenêtre du jeu 2048 4D.
     :param root: The tkinter window
@@ -1298,17 +1297,17 @@ def Game4D(root: tkinter.Tk, isload: bool, data=None) -> dict:
                 center - (2 * self["size"] + 2.5 * self["padding"])) - icon_button_size * 1.5 - icon_button_padding
     pos_y = int(
         self["height"] + 3 * self["size"] + 3.5 * self["padding"] + 0.5 * icon_button_size + 1 * icon_button_padding)
-    IconButton(self["canvas"], left_padding + icon_button_padding + icon_button_size, pos_y,
+    IconButton(self["canvas"], int(left_padding + icon_button_padding + icon_button_size), pos_y,
                "down.png", command=lambda: action(self, "down"), size=(icon_button_size, icon_button_size),
                hover_icon="down_hover.png")
-    IconButton(self["canvas"], 2 * icon_button_size + left_padding + 2 * icon_button_padding,
+    IconButton(self["canvas"], int(2 * icon_button_size + left_padding + 2 * icon_button_padding),
                int(pos_y - icon_button_padding - icon_button_size),
                "right.png", command=lambda: action(self, "right"), size=(icon_button_size, icon_button_size),
                hover_icon="right_hover.png")
-    IconButton(self["canvas"], left_padding, int(pos_y - icon_button_padding - icon_button_size),
+    IconButton(self["canvas"], int(left_padding), int(pos_y - icon_button_padding - icon_button_size),
                "left.png", command=lambda: action(self, "left"), size=(icon_button_size, icon_button_size),
                hover_icon="left_hover.png")
-    IconButton(self["canvas"], left_padding + icon_button_padding + icon_button_size,
+    IconButton(self["canvas"], int(left_padding + icon_button_padding + icon_button_size),
                int(pos_y - 2 * icon_button_padding - 2 * icon_button_size),
                "up.png", command=lambda: action(self, "up"), size=(icon_button_size, icon_button_size),
                hover_icon="up_hover.png")
