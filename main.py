@@ -1055,9 +1055,9 @@ def Game(root: tkinter.Tk, isload: bool, config: dict, data=None):
                  hover_color=(150, 140, 130))
     # Button to save the game
     self["save_button"] = BetterButton(self["canvas"], point[0], point[1] + 120, "Sauvegarder",
-                               command=lambda: save(self["grid"]["matrix"], "simple", self["grid"]["score"]),
-                               size=(200, 50), anchor="n", text_color=(255, 255, 255), color=(119, 110, 101),
-                               hover_color=(150, 140, 130))
+                                       command=lambda: save(self["grid"]["matrix"], "simple", self["grid"]["score"]),
+                                       size=(200, 50), anchor="n", text_color=(255, 255, 255), color=(119, 110, 101),
+                                       hover_color=(150, 140, 130))
 
     def start_ai(self: dict):
         self["canvas"].delete(self["save_button"]["button"])
@@ -1221,7 +1221,7 @@ def Game(root: tkinter.Tk, isload: bool, config: dict, data=None):
     self["update"] = update
     self["fade"] = fade
     self["ai_update"] = ai_update
-    self["start_ai"] =start_ai
+    self["start_ai"] = start_ai
     self["guard_rail"] = False
 
     if isload:
@@ -1430,9 +1430,8 @@ def Game4D(root: tkinter.Tk, isload: bool, config: dict, data=None) -> None:
                                                                  current_x + self["size"],
                                                                  current_y + self["size"],
                                                                  fill=self["config"]["tile_colors"
-                                                                                     ""][str(self["grid"]["matrix"
-                                                                                             ][i][j][
-                                                                                                 k])])
+                                                                                     ""]
+                                                                 [str(self["grid"]["matrix"][i][j][k])])
                         self["texts"][i][j][k] = self["canvas"].create_text(current_x + self["size"] // 2, current_y
                                                                             + self["size"] // 2,
                                                                             text=self["grid"]["matrix"][i][j][k],
