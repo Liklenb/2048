@@ -1054,10 +1054,15 @@ def Game(root: tkinter.Tk, isload: bool, config: dict, data=None):
                  size=(200, 50), command=root.destroy, text_color=(255, 255, 255), color=(119, 110, 101),
                  hover_color=(150, 140, 130))
     # Button to save the game
-    BetterButton(self["canvas"], point[0], point[1] + 120, "Sauvegarder",
-                 command=lambda: save(self["grid"]["matrix"], "simple", self["grid"]["score"]),
-                 size=(200, 50), anchor="n", text_color=(255, 255, 255), color=(119, 110, 101),
-                 hover_color=(150, 140, 130))
+    self["save_button"] = BetterButton(self["canvas"], point[0], point[1] + 120, "Sauvegarder",
+                               command=lambda: save(self["grid"]["matrix"], "simple", self["grid"]["score"]),
+                               size=(200, 50), anchor="n", text_color=(255, 255, 255), color=(119, 110, 101),
+                               hover_color=(150, 140, 130))
+
+    def start_ai(self: dict):
+        self["canvas"].delete(self["save_button"]["button"])
+        self["canvas"].delete(self["save_button"]["text_canvas"])
+        self["ai_update"]()
 
     def ai_update():
         if not self["grid"]["check_lose"](self["grid"], self["grid"]["get_empty_tiles"](self["grid"])):
@@ -1216,6 +1221,7 @@ def Game(root: tkinter.Tk, isload: bool, config: dict, data=None):
     self["update"] = update
     self["fade"] = fade
     self["ai_update"] = ai_update
+    self["start_ai"] =start_ai
     self["guard_rail"] = False
 
     if isload:
@@ -1229,7 +1235,7 @@ def Game(root: tkinter.Tk, isload: bool, config: dict, data=None):
     # button for ai
     BetterButton(self["canvas"], point[0], point[1] + 180, "AI",
                  anchor="n",
-                 size=(200, 50), command=self["ai_update"], text_color=(255, 255, 255),
+                 size=(200, 50), command=lambda: self["start_ai"](self), text_color=(255, 255, 255),
                  color=(119, 110, 101),
                  hover_color=(150, 140, 130))
 
@@ -1372,8 +1378,6 @@ def Game4D(root: tkinter.Tk, isload: bool, config: dict, data=None) -> None:
     self["texts"] = [[[None, None], [None, None]], [[None, None], [None, None]], [[None, None], [None, None]],
                      [[None, None], [None, None]]]
     # create the grid
-    spacex = 10
-    spacey = 0
     # making a 2048 4D grid while adding space in between every block of 4 tiles
     current_x = center - 2 * self["padding"] - 2 * self["size"]
     current_y = self["height"] + self["padding"]
@@ -1427,7 +1431,7 @@ def Game4D(root: tkinter.Tk, isload: bool, config: dict, data=None) -> None:
                                                                  current_y + self["size"],
                                                                  fill=self["config"]["tile_colors"
                                                                                      ""][str(self["grid"]["matrix"
-                                                                                                          ][i][j][
+                                                                                             ][i][j][
                                                                                                  k])])
                         self["texts"][i][j][k] = self["canvas"].create_text(current_x + self["size"] // 2, current_y
                                                                             + self["size"] // 2,
