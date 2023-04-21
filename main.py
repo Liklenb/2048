@@ -25,7 +25,7 @@ def load():
 
     # Si l'utilisateur annule, on arrête la fonction.
     if file is None:
-        return False
+        return None
 
     # On charge les informations de la partie sauvegardée.
     with open(file.name, "r") as f:
