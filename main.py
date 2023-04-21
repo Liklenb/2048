@@ -1071,7 +1071,7 @@ def Game(root: tkinter.Tk, isload: bool, config: dict, data=None):
                 move_data = self["grid"]["ai"](self["grid"])
                 animation_duration = 100
 
-                self["canvas"].itemconfig(self["score"], text=self["grid"]["score"])
+                self["canvas"].itemconfig(self["score"], text="Score : " + str(self["grid"]["score"]))
 
                 for movement in move_data["mouvement"]:
                     self["animation"](self, movement["from"], movement["to"], animation_duration, fps=144,
