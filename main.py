@@ -50,18 +50,15 @@ def load():
             for y in range(2):
 
                 if len(info["matrix"][x][y]) != 2:
-                    print("wat2")
                     return False
 
                 for z in range(2):
                     if info["matrix"][x][y][z] not in [0, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048]:
-                        print("wat3")
                         return False
 
                     score_verify += info["matrix"][x][y][z]
 
         if score_verify != info["score"]:
-            print("wat4")
             return False
 
         data = {"type": "4D", "matrix": info["matrix"], "score": info["score"]}
@@ -991,7 +988,9 @@ def Menu(root: tkinter.Tk):
 
     def verify_load():
         data = load()
-        if not data:
+        if data is None:
+            return
+        elif not data:
             show_message_box(root=root, canvas=self["canvas"], title="Oups",
                              message="Une erreur est survenue"
                                      " lors du chargement de la partie.\nAvez vous chargé le bon fichier ?")
@@ -1009,7 +1008,8 @@ def Menu(root: tkinter.Tk):
                                fill="#776e65")
     point = int(root.winfo_width() // 2), int(root.winfo_height() // 2.35)
     BetterButton(self["canvas"], point[0], point[1], "Classique", anchor="n",
-                 size=(400, 80), command=lambda: Game(root, False, self["config"]), text_color=(255, 255, 255), color=(119, 110, 101),
+                 size=(400, 80), command=lambda: Game(root, False, self["config"]), text_color=(255, 255, 255),
+                 color=(119, 110, 101),
                  hover_color=(150, 140, 130), font=tkinter.font.Font(size=50), border_radius=90)
     BetterButton(self["canvas"], point[0], point[1] + 90, "4D",
                  size=(400, 80),
@@ -1028,7 +1028,7 @@ def Menu(root: tkinter.Tk):
                  hover_color=(150, 140, 130), font=tkinter.font.Font(size=50), border_radius=90)
 
 
-def Game(root: tkinter.Tk, isload: bool, config:dict, data=None):
+def Game(root: tkinter.Tk, isload: bool, config: dict, data=None):
     """
     Creates a game window
     :param root: The tkinter window
@@ -1136,7 +1136,8 @@ def Game(root: tkinter.Tk, isload: bool, config:dict, data=None):
                                                           self["height"] + j * (self["size"] + self["padding"]) +
                                                           self["size"] +
                                                           self["padding"],
-                                                          fill=self["config"]["tile_colors"][str(self["grid"]["matrix"][i][j])],
+                                                          fill=self["config"]["tile_colors"][
+                                                              str(self["grid"]["matrix"][i][j])],
                                                           radius=10)
                     self["texts"][i][j] = self["canvas"].create_text(
                         int(center - (1.5 * self["padding"] + 2 * self["size"]) + i * (self["size"] + self["padding"]) +
@@ -1259,8 +1260,6 @@ def Game(root: tkinter.Tk, isload: bool, config:dict, data=None):
                               fps=self["config"]["animation_fps"],
                               function=lambda x: -(math.cos(math.pi * x) - 1) / 2)
 
-        # print(direction, self["grid"]["matrix"])
-        # update(self)
         # update the score
         self["canvas"].itemconfig(self["score"], text="Score : " + str(self["grid"]["score"]))
 
@@ -1300,7 +1299,7 @@ def Game(root: tkinter.Tk, isload: bool, config:dict, data=None):
 
 
 # making the 2048 4D window
-def Game4D(root: tkinter.Tk, isload: bool, config:dict, data=None) -> None:
+def Game4D(root: tkinter.Tk, isload: bool, config: dict, data=None) -> None:
     """
     Fonction qui crée la fenêtre du jeu 2048 4D.
     :param root: The tkinter window
@@ -1428,7 +1427,8 @@ def Game4D(root: tkinter.Tk, isload: bool, config:dict, data=None) -> None:
                                                                  current_y + self["size"],
                                                                  fill=self["config"]["tile_colors"
                                                                                      ""][str(self["grid"]["matrix"
-                                                                                                      ""][i][j][k])])
+                                                                                                          ][i][j][
+                                                                                                 k])])
                         self["texts"][i][j][k] = self["canvas"].create_text(current_x + self["size"] // 2, current_y
                                                                             + self["size"] // 2,
                                                                             text=self["grid"]["matrix"][i][j][k],
